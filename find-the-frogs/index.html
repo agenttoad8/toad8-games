@@ -11,14 +11,14 @@
 <meta property="og:title" content="Find the Frogs! · TOAD 8">
 <meta property="og:description" content="Tap the frogs hiding on a notary's desk.">
 <meta property="og:url" content="https://agenttoad8.github.io/toad8-games/find-the-frogs/">
-<meta property="og:image" content="https://agenttoad8.github.io/toad8-games/find-the-frogs/board.png?v=3">
+<meta property="og:image" content="https://agenttoad8.github.io/toad8-games/find-the-frogs/board.png?v=4">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
 <meta property="og:image:alt" content="A cozy notary desk and pond, with cute green frogs hiding in the picture.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Find the Frogs! · TOAD 8">
 <meta name="twitter:description" content="Tap the frogs hiding on a notary's desk.">
-<meta name="twitter:image" content="https://agenttoad8.github.io/toad8-games/find-the-frogs/board.png?v=3">
+<meta name="twitter:image" content="https://agenttoad8.github.io/toad8-games/find-the-frogs/board.png?v=4">
 <style>
   :root {
     --blue: #1f93ef;
@@ -253,7 +253,7 @@
   <div id="stage">
     <div id="shake">
       <div id="board">
-        <img src="board.png?v=3" alt="A cozy notary desk beside a little pond. Cute green frogs are hidden in the picture." width="1280" height="720">
+        <img src="board.png?v=4" alt="A cozy notary desk beside a little pond. Cute green frogs are hidden in the picture." width="1280" height="720">
       </div>
     </div>
   </div>
@@ -276,7 +276,7 @@
     { id: "pot", x: 120, y: 135, rx: 72, ry: 58 },
     { id: "pond", x: 410, y: 230, rx: 85, ry: 60 },
     { id: "crate", x: 1095, y: 245, rx: 75, ry: 62 },
-    { id: "stamp", x: 240, y: 355, rx: 70, ry: 68 },
+    { id: "stamp", x: 248, y: 352, rx: 128, ry: 102 },
     { id: "ink", x: 515, y: 528, rx: 48, ry: 36 },
     { id: "pen", x: 495, y: 608, rx: 48, ry: 38 },
     { id: "jar", x: 172, y: 618, rx: 62, ry: 52 },
@@ -300,6 +300,8 @@
   var pointers = new Map();
   var pinch = null;
   var pan = null;
+  // A finger tap jitters. Anything inside this distance is a tap, not a pan.
+  var TAP_SLOP = 28;
   var audioCtx = null;
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -387,18 +389,25 @@
   function frogAt(nx, ny) {
     var px = nx * IMG_W;
     var py = ny * IMG_H;
-    var best = null;
-    var bestD = Infinity;
+    var fresh = null;
+    var freshD = Infinity;
+    var used = null;
+    var usedD = Infinity;
     FROGS.forEach(function (frog) {
       var dx = (px - frog.x) / frog.rx;
       var dy = (py - frog.y) / frog.ry;
       var d = dx * dx + dy * dy;
-      if (d <= 1 && d < bestD) {
-        best = frog;
-        bestD = d;
+      if (d > 1) return;
+      if (!found[frog.id] && d < freshD) {
+        fresh = frog;
+        freshD = d;
+      } else if (found[frog.id] && d < usedD) {
+        used = frog;
+        usedD = d;
       }
     });
-    return best;
+    // A circle already found must not swallow a tap that also lands on a frog still hidden.
+    return fresh || used;
   }
 
   function localPoint(clientX, clientY) {
@@ -508,8 +517,13 @@
     };
   }
 
+  stage.addEventListener("touchstart", function (e) {
+    if (e.cancelable) e.preventDefault();
+  }, { passive: false });
+
   stage.addEventListener("pointerdown", function (e) {
-    if (e.button !== undefined && e.button !== 0) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    if (e.cancelable) e.preventDefault();
     stage.setPointerCapture(e.pointerId);
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.size === 2) {
@@ -521,6 +535,8 @@
       pan = {
         x: e.clientX,
         y: e.clientY,
+        downX: e.clientX,
+        downY: e.clientY,
         tx: tx,
         ty: ty,
         moved: 0,
@@ -553,7 +569,8 @@
     var dx = e.clientX - pan.x;
     var dy = e.clientY - pan.y;
     pan.moved = Math.hypot(dx, dy);
-    if (scale > 1.02 && pan.moved > 3) {
+    // Keep the picture still until the finger has clearly dragged.
+    if (scale > 1.02 && pan.moved > TAP_SLOP) {
       tx = pan.tx + dx;
       ty = pan.ty + dy;
       clampPan();
@@ -565,12 +582,13 @@
     pointers.delete(e.pointerId);
     if (pointers.size < 2) pinch = null;
     if (pointers.size === 0 && pan) {
-      if (allowTap && !pan.pinched && pan.moved < 14) tap(e.clientX, e.clientY);
+      if (allowTap && !pan.pinched && pan.moved <= TAP_SLOP) tap(pan.downX, pan.downY);
       pan = null;
     }
   }
   stage.addEventListener("pointerup", function (e) { endPointer(e, true); });
-  stage.addEventListener("pointercancel", function (e) { endPointer(e, false); });
+  // Android Chrome sometimes cancels a short touch instead of sending pointerup.
+  stage.addEventListener("pointercancel", function (e) { endPointer(e, true); });
 
   hintBtn.addEventListener("click", showHint);
   zoomBtn.addEventListener("click", function () {
