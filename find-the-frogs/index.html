@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f93ef">
+<title>Find the Frogs! · TOAD 8</title>
+<meta name="description" content="Tap the eight frogs hiding on a notary's desk. A cozy browser game from TOAD 8 Notaries &amp; Services.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TOAD 8 Brain Games">
+<meta property="og:title" content="Find the Frogs! · TOAD 8">
+<meta property="og:description" content="Tap the eight frogs hiding on a notary's desk.">
+<meta property="og:url" content="https://agenttoad8.github.io/toad8-games/find-the-frogs/">
+<meta property="og:image" content="https://agenttoad8.github.io/toad8-games/find-the-frogs/board.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:alt" content="A cozy notary desk and pond, with eight green frogs hiding in the picture.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Find the Frogs! · TOAD 8">
+<meta name="twitter:description" content="Tap the eight frogs hiding on a notary's desk.">
+<meta name="twitter:image" content="https://agenttoad8.github.io/toad8-games/find-the-frogs/board.png">
+<style>
+  :root {
+    --blue: #1f93ef;
+    --blue-deep: #146fba;
+    --green: #1f9a45;
+    --ink: #145c38;
+    --pink: #ff7eb6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    font-family: "Trebuchet MS", "Segoe UI", "Gill Sans", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 12% 10%, rgba(255,255,255,.85) 0 2px, transparent 3px),
+      linear-gradient(180deg, #fff6df 0%, #e5f6ff 48%, #d9f5c9 100%);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  header {
+    padding: calc(10px + env(safe-area-inset-top)) 14px 8px;
+    text-align: center;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(28px, 8vw, 44px);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    color: var(--green);
+    text-shadow: 0 2px 0 #fff, 0 4px 0 rgba(255, 190, 220, .55);
+  }
+  #count {
+    margin: 4px 0 0;
+    font-size: clamp(16px, 4.2vw, 20px);
+    font-weight: 800;
+    color: #17628f;
+  }
+  .help {
+    margin: 2px auto 8px;
+    max-width: 28em;
+    font-size: 14px;
+    font-weight: 700;
+    color: #3d7e55;
+  }
+  .tools {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  .tools button {
+    appearance: none;
+    border: 0;
+    min-height: 44px;
+    min-width: 96px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  #hint {
+    background: var(--pink);
+    color: #fff;
+    box-shadow: 0 4px 0 #e25595;
+  }
+  #zoom {
+    background: #fff;
+    color: var(--blue-deep);
+    box-shadow: 0 4px 0 rgba(20, 111, 186, .28);
+  }
+  .tools button:active { transform: translateY(2px); }
+  .tools button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  #stage {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    margin: 4px 10px 10px;
+    border-radius: 22px;
+    overflow: hidden;
+    touch-action: none;
+    background: #f3e2c4;
+    box-shadow:
+      0 8px 0 rgba(20, 111, 186, .16),
+      0 16px 30px rgba(20, 90, 40, .12);
+    cursor: pointer;
+  }
+  #shake { position: absolute; inset: 0; }
+  #board { position: absolute; left: 0; top: 0; }
+  #board img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+    -webkit-user-drag: none;
+  }
+  .mark, .pulse, .ripple {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+  .mark {
+    border: 3px solid var(--pink);
+    background: rgba(255, 126, 182, .32);
+    box-shadow: 0 0 0 3px rgba(255,255,255,.85), 0 0 12px rgba(255, 126, 182, .85);
+    animation: pop 280ms ease-out;
+  }
+  @keyframes pop {
+    from { transform: translate(-50%, -50%) scale(.35); opacity: 0; }
+  }
+  .pulse {
+    border: 4px solid var(--pink);
+    box-shadow: 0 0 0 4px rgba(255,255,255,.8);
+    animation: pulse 1.8s ease-in-out;
+  }
+  @keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(.55); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.55); opacity: 0; }
+  }
+  .ripple {
+    width: 18px;
+    height: 18px;
+    border: 3px solid var(--blue);
+    background: rgba(255,255,255,.35);
+    animation: ripple 620ms ease-out forwards;
+  }
+  @keyframes ripple {
+    to { transform: translate(-50%, -50%) scale(3.2); opacity: 0; }
+  }
+  #shake.wiggle { animation: wiggle 420ms ease-in-out; }
+  @keyframes wiggle {
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-2px); }
+    80% { transform: translateX(2px); }
+  }
+  footer {
+    background: var(--blue);
+    color: #fff;
+    text-align: center;
+    font-weight: 800;
+    letter-spacing: .06em;
+    font-size: clamp(14px, 3.6vw, 20px);
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    box-shadow: inset 0 4px 0 rgba(255,255,255,.25);
+  }
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(20, 90, 140, .28);
+    backdrop-filter: blur(3px);
+  }
+  .overlay[hidden] { display: none; }
+  .card {
+    position: relative;
+    width: min(420px, 100%);
+    background: #fff;
+    border-radius: 28px;
+    padding: 26px 22px 22px;
+    text-align: center;
+    box-shadow: 0 12px 0 rgba(20, 111, 186, .18), 0 20px 50px rgba(10, 40, 70, .25);
+    border: 4px solid #fff;
+    outline: 3px solid var(--pink);
+  }
+  .card h2 {
+    margin: 8px 0 4px;
+    font-size: clamp(26px, 6vw, 34px);
+    color: var(--green);
+  }
+  .card p { margin: 0 0 16px; color: #17628f; font-weight: 700; }
+  #again {
+    appearance: none;
+    border: 0;
+    background: var(--pink);
+    color: #fff;
+    font: inherit;
+    font-weight: 800;
+    font-size: 18px;
+    border-radius: 999px;
+    min-height: 44px;
+    padding: 12px 28px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #e25595;
+  }
+  #again:active { transform: translateY(2px); box-shadow: 0 3px 0 #e25595; }
+  #again:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+  .confetti {
+    position: absolute;
+    top: 8px;
+    width: 8px;
+    height: 12px;
+    border-radius: 2px;
+    animation: fall 900ms ease-in forwards;
+    pointer-events: none;
+  }
+  @keyframes fall {
+    to { transform: translateY(70px) rotate(180deg); opacity: .2; }
+  }
+  .noscript { margin: 12px; text-align: center; font-weight: 700; }
+  @media (prefers-reduced-motion: reduce) {
+    .mark, .pulse, .ripple, #shake.wiggle, .confetti { animation: none; }
+    .pulse { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Find the Frogs!</h1>
+    <p id="count" aria-live="polite">Found 0/8</p>
+    <p class="help">Eight green frogs are hiding on the desk. Tap each one you spot.</p>
+    <div class="tools">
+      <button type="button" id="hint">Hint</button>
+      <button type="button" id="zoom" aria-label="Zoom in">Zoom</button>
+    </div>
+  </header>
+  <div id="stage">
+    <div id="shake">
+      <div id="board">
+        <img src="board.png" alt="A cozy notary desk beside a little pond. Eight green frogs are hidden in the picture." width="1280" height="720">
+      </div>
+    </div>
+  </div>
+  <footer>TOAD 8 Notaries &amp; Services</footer>
+  <div class="overlay" id="overlay" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="win-title">
+      <div id="confetti"></div>
+      <h2 id="win-title">You found every frog!</h2>
+      <p>All eight were hiding on the desk. Nice eyes.</p>
+      <button type="button" id="again">Play again</button>
+    </div>
+  </div>
+  <noscript><p class="noscript">This desk needs JavaScript so you can tap the frogs.</p></noscript>
+<script>
+(function () {
+  var IMG_W = 1280;
+  var IMG_H = 720;
+  // Centers and radii in pixels of board.png. Each ellipse covers one frog.
+  var FROGS = [
+    { id: "pot", x: 118, y: 120, rx: 64, ry: 56 },
+    { id: "pond", x: 400, y: 210, rx: 72, ry: 58 },
+    { id: "crate", x: 1072, y: 242, rx: 62, ry: 55 },
+    { id: "spring", x: 230, y: 380, rx: 66, ry: 58 },
+    { id: "affidavit", x: 510, y: 568, rx: 80, ry: 62 },
+    { id: "jar", x: 156, y: 618, rx: 58, ry: 52 },
+    { id: "papers", x: 1108, y: 518, rx: 78, ry: 60 },
+    { id: "cloth", x: 1248, y: 656, rx: 48, ry: 62 }
+  ];
+
+  var stage = document.getElementById("stage");
+  var shake = document.getElementById("shake");
+  var board = document.getElementById("board");
+  var countEl = document.getElementById("count");
+  var hintBtn = document.getElementById("hint");
+  var zoomBtn = document.getElementById("zoom");
+  var overlay = document.getElementById("overlay");
+  var again = document.getElementById("again");
+  var found = {};
+  var scale = 1;
+  var tx = 0;
+  var ty = 0;
+  var baseW = 1;
+  var baseH = 1;
+  var pointers = new Map();
+  var pinch = null;
+  var pan = null;
+  var audioCtx = null;
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function tone(freq, dur) {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      var o = audioCtx.createOscillator();
+      var g = audioCtx.createGain();
+      o.type = "triangle";
+      o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.05, audioCtx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+      o.connect(g);
+      g.connect(audioCtx.destination);
+      o.start();
+      o.stop(audioCtx.currentTime + dur + 0.02);
+    } catch (err) { /* sound is optional */ }
+  }
+
+  function layout() {
+    var sw = stage.clientWidth;
+    var sh = stage.clientHeight;
+    var aspect = IMG_W / IMG_H;
+    baseW = sw;
+    baseH = sw / aspect;
+    if (baseH > sh) {
+      baseH = sh;
+      baseW = sh * aspect;
+    }
+    clampPan();
+    apply();
+  }
+
+  function apply() {
+    board.style.width = baseW + "px";
+    board.style.height = baseH + "px";
+    board.style.transform = "translate(" + tx + "px," + ty + "px) scale(" + scale + ")";
+    board.style.transformOrigin = "0 0";
+  }
+
+  function clampPan() {
+    var sw = stage.clientWidth;
+    var sh = stage.clientHeight;
+    var bw = baseW * scale;
+    var bh = baseH * scale;
+    if (bw <= sw) tx = (sw - bw) / 2;
+    else tx = Math.min(0, Math.max(sw - bw, tx));
+    if (bh <= sh) ty = (sh - bh) / 2;
+    else ty = Math.min(0, Math.max(sh - bh, ty));
+  }
+
+  function zoomAbout(next, cx, cy) {
+    var bx = (cx - tx) / scale;
+    var by = (cy - ty) / scale;
+    scale = next;
+    tx = cx - bx * scale;
+    ty = cy - by * scale;
+    clampPan();
+    apply();
+    zoomBtn.textContent = scale > 2.5 ? "Fit" : "Zoom";
+    zoomBtn.setAttribute("aria-label", scale > 2.5 ? "Show the whole desk" : "Zoom in");
+  }
+
+  function updateCount() {
+    var n = Object.keys(found).length;
+    countEl.textContent = "Found " + n + "/8";
+  }
+
+  function place(el, frog, grow) {
+    var g = grow || 1;
+    el.style.left = (frog.x / IMG_W * 100) + "%";
+    el.style.top = (frog.y / IMG_H * 100) + "%";
+    el.style.width = (frog.rx * 2 * g / IMG_W * 100) + "%";
+    el.style.height = (frog.ry * 2 * g / IMG_H * 100) + "%";
+  }
+
+  function mark(frog) {
+    var el = document.createElement("div");
+    el.className = "mark";
+    place(el, frog, 0.92);
+    board.appendChild(el);
+  }
+
+  function frogAt(nx, ny) {
+    var px = nx * IMG_W;
+    var py = ny * IMG_H;
+    var best = null;
+    var bestD = Infinity;
+    FROGS.forEach(function (frog) {
+      var dx = (px - frog.x) / frog.rx;
+      var dy = (py - frog.y) / frog.ry;
+      var d = dx * dx + dy * dy;
+      if (d <= 1 && d < bestD) {
+        best = frog;
+        bestD = d;
+      }
+    });
+    return best;
+  }
+
+  function localPoint(clientX, clientY) {
+    var rect = board.getBoundingClientRect();
+    return {
+      x: (clientX - rect.left) / rect.width,
+      y: (clientY - rect.top) / rect.height
+    };
+  }
+
+  function rippleAt(nx, ny) {
+    var el = document.createElement("div");
+    el.className = "ripple";
+    el.style.left = (nx * 100) + "%";
+    el.style.top = (ny * 100) + "%";
+    board.appendChild(el);
+    setTimeout(function () { el.remove(); }, 700);
+    if (!reduced) {
+      shake.classList.remove("wiggle");
+      void shake.offsetWidth;
+      shake.classList.add("wiggle");
+    }
+  }
+
+  function celebrate() {
+    var box = document.getElementById("confetti");
+    box.innerHTML = "";
+    var colors = ["#ff7eb6", "#7cdb4a", "#3db7ff", "#ffe56a", "#fff"];
+    for (var i = 0; i < 18; i++) {
+      var bit = document.createElement("i");
+      bit.className = "confetti";
+      bit.style.left = (8 + Math.random() * 84) + "%";
+      bit.style.background = colors[i % colors.length];
+      bit.style.animationDelay = (Math.random() * 180) + "ms";
+      box.appendChild(bit);
+    }
+    overlay.hidden = false;
+    again.focus();
+    tone(523, 0.12);
+    setTimeout(function () { tone(659, 0.12); }, 120);
+    setTimeout(function () { tone(784, 0.22); }, 240);
+  }
+
+  function tap(clientX, clientY) {
+    if (!overlay.hidden) return;
+    var p = localPoint(clientX, clientY);
+    if (p.x < 0 || p.y < 0 || p.x > 1 || p.y > 1) return;
+    var frog = frogAt(p.x, p.y);
+    if (!frog) {
+      rippleAt(p.x, p.y);
+      tone(220, 0.08);
+      return;
+    }
+    if (found[frog.id]) return;
+    found[frog.id] = true;
+    mark(frog);
+    updateCount();
+    tone(640, 0.1);
+    if (Object.keys(found).length === FROGS.length) celebrate();
+  }
+
+  function showHint() {
+    if (!overlay.hidden) return;
+    var left = FROGS.filter(function (frog) { return !found[frog.id]; });
+    if (!left.length) return;
+    var frog = left[Math.floor(Math.random() * left.length)];
+    var fx = (frog.x / IMG_W) * baseW * scale;
+    var fy = (frog.y / IMG_H) * baseH * scale;
+    tx = stage.clientWidth / 2 - fx;
+    ty = stage.clientHeight / 2 - fy;
+    clampPan();
+    apply();
+    var el = document.createElement("div");
+    el.className = "pulse";
+    place(el, frog, 1.15);
+    board.appendChild(el);
+    setTimeout(function () { el.remove(); }, 1900);
+    tone(520, 0.08);
+  }
+
+  function resetGame() {
+    found = {};
+    board.querySelectorAll(".mark, .pulse, .ripple").forEach(function (el) { el.remove(); });
+    overlay.hidden = true;
+    updateCount();
+    scale = 1;
+    tx = 0;
+    ty = 0;
+    layout();
+    zoomBtn.textContent = "Zoom";
+    zoomBtn.setAttribute("aria-label", "Zoom in");
+  }
+
+  function pinchDist() {
+    var pts = Array.from(pointers.values());
+    var dx = pts[0].x - pts[1].x;
+    var dy = pts[0].y - pts[1].y;
+    return Math.hypot(dx, dy) || 1;
+  }
+
+  function pinchMid() {
+    var pts = Array.from(pointers.values());
+    var rect = stage.getBoundingClientRect();
+    return {
+      x: (pts[0].x + pts[1].x) / 2 - rect.left,
+      y: (pts[0].y + pts[1].y) / 2 - rect.top
+    };
+  }
+
+  stage.addEventListener("pointerdown", function (e) {
+    if (e.button !== undefined && e.button !== 0) return;
+    stage.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 2) {
+      var mid = pinchMid();
+      pinch = { dist: pinchDist(), scale: scale, tx: tx, ty: ty, mid: mid };
+      pan = null;
+    } else {
+      var rect = stage.getBoundingClientRect();
+      pan = {
+        x: e.clientX,
+        y: e.clientY,
+        tx: tx,
+        ty: ty,
+        moved: 0,
+        pinched: false,
+        sx: e.clientX - rect.left,
+        sy: e.clientY - rect.top
+      };
+    }
+  });
+
+  stage.addEventListener("pointermove", function (e) {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size >= 2 && pinch) {
+      var dist = pinchDist();
+      var mid = pinchMid();
+      var next = Math.min(4, Math.max(1, pinch.scale * (dist / pinch.dist)));
+      var bx = (pinch.mid.x - pinch.tx) / pinch.scale;
+      var by = (pinch.mid.y - pinch.ty) / pinch.scale;
+      scale = next;
+      tx = mid.x - bx * scale;
+      ty = mid.y - by * scale;
+      clampPan();
+      apply();
+      if (pan) pan.pinched = true;
+      zoomBtn.textContent = scale > 2.5 ? "Fit" : "Zoom";
+      return;
+    }
+    if (!pan) return;
+    var dx = e.clientX - pan.x;
+    var dy = e.clientY - pan.y;
+    pan.moved = Math.hypot(dx, dy);
+    if (scale > 1.02 && pan.moved > 3) {
+      tx = pan.tx + dx;
+      ty = pan.ty + dy;
+      clampPan();
+      apply();
+    }
+  });
+
+  function endPointer(e, allowTap) {
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) pinch = null;
+    if (pointers.size === 0 && pan) {
+      if (allowTap && !pan.pinched && pan.moved < 14) tap(e.clientX, e.clientY);
+      pan = null;
+    }
+  }
+  stage.addEventListener("pointerup", function (e) { endPointer(e, true); });
+  stage.addEventListener("pointercancel", function (e) { endPointer(e, false); });
+
+  hintBtn.addEventListener("click", showHint);
+  zoomBtn.addEventListener("click", function () {
+    var rect = stage.getBoundingClientRect();
+    var next = scale < 1.5 ? 2 : scale < 2.5 ? 3 : 1;
+    zoomAbout(next, rect.width / 2, rect.height / 2);
+  });
+  again.addEventListener("click", resetGame);
+  window.addEventListener("resize", layout);
+  layout();
+})();
+</script>
+</body>
+</html>
