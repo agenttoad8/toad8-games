@@ -115,6 +115,7 @@
     box-shadow: 0 5px 0 #e25595;
   }
   .game:active .play { transform: translateY(2px); box-shadow: 0 3px 0 #e25595; }
+  .games { display: flex; flex-direction: column; gap: 16px; }
   footer {
     margin-top: auto;
     background: var(--blue);
@@ -132,12 +133,20 @@
   <main>
     <h1>TOAD 8 <span>Brain Games</span></h1>
     <p class="lead">Little games you can open from a link. Nothing to install — just tap and play.</p>
-    <a class="game" href="frog-pond/">
-      <p class="eyebrow">Pond hop</p>
-      <h2>Help the frog home!</h2>
-      <p>Tap lily pads to hop a frog to the TOAD 8 dock. Some pads sink, so choose the glowing ones.</p>
-      <span class="play">Play</span>
-    </a>
+    <div class="games">
+      <a class="game" href="frog-pond/">
+        <p class="eyebrow">Pond hop</p>
+        <h2>Help the frog home!</h2>
+        <p>Tap lily pads to hop a frog to the TOAD 8 dock. Some pads sink, so choose the glowing ones.</p>
+        <span class="play">Play</span>
+      </a>
+      <a class="game" href="find-the-frogs/">
+        <p class="eyebrow">Hidden frogs</p>
+        <h2>Find the Frogs!</h2>
+        <p>Eight frogs are tucked into a notary’s desk. Tap each one you spot.</p>
+        <span class="play">Play</span>
+      </a>
+    </div>
   </main>
   <footer>TOAD 8</footer>
 </body>
