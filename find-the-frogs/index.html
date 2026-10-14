@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1f93ef">
 <title>Find the Frogs! · TOAD 8</title>
-<meta name="description" content="Tap the eight frogs hiding on a notary's desk. A cozy browser game from TOAD 8 Notaries &amp; Services.">
+<meta name="description" content="Tap the frogs hiding on a notary's desk. A cozy browser game from TOAD 8 Notaries &amp; Services.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="TOAD 8 Brain Games">
 <meta property="og:title" content="Find the Frogs! · TOAD 8">
-<meta property="og:description" content="Tap the eight frogs hiding on a notary's desk.">
+<meta property="og:description" content="Tap the frogs hiding on a notary's desk.">
 <meta property="og:url" content="https://agenttoad8.github.io/toad8-games/find-the-frogs/">
 <meta property="og:image" content="https://agenttoad8.github.io/toad8-games/find-the-frogs/board.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="720">
-<meta property="og:image:alt" content="A cozy notary desk and pond, with eight green frogs hiding in the picture.">
+<meta property="og:image:alt" content="A cozy notary desk and pond, with cute green frogs hiding in the picture.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Find the Frogs! · TOAD 8">
-<meta name="twitter:description" content="Tap the eight frogs hiding on a notary's desk.">
+<meta name="twitter:description" content="Tap the frogs hiding on a notary's desk.">
 <meta name="twitter:image" content="https://agenttoad8.github.io/toad8-games/find-the-frogs/board.png">
 <style>
   :root {
@@ -243,8 +243,8 @@
 <body>
   <header>
     <h1>Find the Frogs!</h1>
-    <p id="count" aria-live="polite">Found 0/8</p>
-    <p class="help">Eight green frogs are hiding on the desk. Tap each one you spot.</p>
+    <p id="count" aria-live="polite">Found 0/9</p>
+    <p class="help">Nine green frogs are hiding on the desk. Tap each one you spot.</p>
     <div class="tools">
       <button type="button" id="hint">Hint</button>
       <button type="button" id="zoom" aria-label="Zoom in">Zoom</button>
@@ -253,7 +253,7 @@
   <div id="stage">
     <div id="shake">
       <div id="board">
-        <img src="board.png" alt="A cozy notary desk beside a little pond. Eight green frogs are hidden in the picture." width="1280" height="720">
+        <img src="board.png" alt="A cozy notary desk beside a little pond. Cute green frogs are hidden in the picture." width="1280" height="720">
       </div>
     </div>
   </div>
@@ -262,7 +262,7 @@
     <div class="card" role="dialog" aria-modal="true" aria-labelledby="win-title">
       <div id="confetti"></div>
       <h2 id="win-title">You found every frog!</h2>
-      <p>All eight were hiding on the desk. Nice eyes.</p>
+      <p>Every frog on the desk is home. Nice eyes.</p>
       <button type="button" id="again">Play again</button>
     </div>
   </div>
@@ -273,14 +273,15 @@
   var IMG_H = 720;
   // Centers and radii in pixels of board.png. Each ellipse covers one frog.
   var FROGS = [
-    { id: "pot", x: 118, y: 120, rx: 64, ry: 56 },
-    { id: "pond", x: 400, y: 210, rx: 72, ry: 58 },
-    { id: "crate", x: 1072, y: 242, rx: 62, ry: 55 },
-    { id: "spring", x: 230, y: 380, rx: 66, ry: 58 },
-    { id: "affidavit", x: 510, y: 568, rx: 80, ry: 62 },
-    { id: "jar", x: 156, y: 618, rx: 58, ry: 52 },
-    { id: "papers", x: 1108, y: 518, rx: 78, ry: 60 },
-    { id: "cloth", x: 1248, y: 656, rx: 48, ry: 62 }
+    { id: "pot", x: 120, y: 135, rx: 72, ry: 58 },
+    { id: "pond", x: 410, y: 230, rx: 85, ry: 60 },
+    { id: "crate", x: 1095, y: 245, rx: 75, ry: 62 },
+    { id: "stamp", x: 230, y: 350, rx: 75, ry: 78 },
+    { id: "ink", x: 575, y: 478, rx: 95, ry: 82 },
+    { id: "pen", x: 555, y: 592, rx: 70, ry: 50 },
+    { id: "jar", x: 172, y: 618, rx: 62, ry: 52 },
+    { id: "papers", x: 1070, y: 515, rx: 75, ry: 55 },
+    { id: "cloth", x: 1220, y: 605, rx: 58, ry: 48 }
   ];
 
   var stage = document.getElementById("stage");
@@ -366,7 +367,7 @@
 
   function updateCount() {
     var n = Object.keys(found).length;
-    countEl.textContent = "Found " + n + "/8";
+    countEl.textContent = "Found " + n + "/" + FROGS.length;
   }
 
   function place(el, frog, grow) {
