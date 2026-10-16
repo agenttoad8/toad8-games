@@ -30,10 +30,13 @@ jobs:
 
       - name: Assemble site
         run: |
-          mkdir -p _site/frog-pond _site/find-the-frogs
+          mkdir -p _site/frog-pond _site/find-the-frogs _site/spot-the-difference _site/word-scramble _site/memory-match
           cp index.html og.png .nojekyll _site/
           cp frog-pond/index.html _site/frog-pond/index.html
           cp find-the-frogs/index.html find-the-frogs/board.png _site/find-the-frogs/
+          cp spot-the-difference/index.html spot-the-difference/picnic.png _site/spot-the-difference/
+          cp word-scramble/index.html _site/word-scramble/index.html
+          cp memory-match/index.html _site/memory-match/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

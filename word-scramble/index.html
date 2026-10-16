@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f93ef">
+<title>Word Scramble · TOAD 8</title>
+<meta name="description" content="Unscramble notary and pond words by tapping letter tiles. A cozy browser game from TOAD 8 Notaries &amp; Services.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TOAD 8 Brain Games">
+<meta property="og:title" content="Word Scramble · TOAD 8">
+<meta property="og:description" content="Tap the letter tiles to unscramble notary and pond words.">
+<meta property="og:url" content="https://agenttoad8.github.io/toad8-games/word-scramble/">
+<meta property="og:image" content="https://agenttoad8.github.io/toad8-games/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="TOAD 8 Brain Games, with a frog hopping across a pond.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Word Scramble · TOAD 8">
+<meta name="twitter:description" content="Tap the letter tiles to unscramble notary and pond words.">
+<meta name="twitter:image" content="https://agenttoad8.github.io/toad8-games/og.png">
+<style>
+  :root {
+    --blue: #1f93ef;
+    --blue-deep: #146fba;
+    --green: #1f9a45;
+    --ink: #145c38;
+    --pink: #ff7eb6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Trebuchet MS", "Segoe UI", "Gill Sans", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 12% 10%, rgba(255,255,255,.85) 0 2px, transparent 3px),
+      linear-gradient(180deg, #fff6df 0%, #e5f6ff 48%, #d9f5c9 100%);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  header { padding: calc(10px + env(safe-area-inset-top)) 16px 0; text-align: center; }
+  .home { color: var(--blue-deep); font-weight: 800; font-size: 14px; text-decoration: none; }
+  h1 { margin: 2px 0 0; font-size: clamp(28px, 7vw, 42px); line-height: 1; color: #128a3d; text-shadow: 0 2px 0 #fff; }
+  main { width: min(560px, 100%); margin: 0 auto; padding: 12px 16px 24px; flex: 1; }
+  .progress-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 800; color: var(--blue-deep); }
+  .bar { height: 14px; border-radius: 999px; background: #fff; box-shadow: inset 0 2px 0 rgba(20,111,186,.12); overflow: hidden; margin: 8px 0 14px; }
+  .bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #7cdb4a, var(--green)); border-radius: 999px; transition: width .25s ease; }
+  .clue { margin: 0 0 12px; min-height: 2.6em; text-align: center; font-weight: 800; font-size: clamp(16px, 4vw, 20px); color: #17628f; }
+  #slots {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 64px; margin-bottom: 18px;
+  }
+  .slot, .tile {
+    appearance: none; border: 0; font: inherit; font-weight: 800; cursor: pointer;
+    min-width: 46px; min-height: 52px; padding: 8px 10px; border-radius: 14px; font-size: 22px;
+  }
+  .slot { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 3px #d7eef8; }
+  .slot.filled { box-shadow: inset 0 0 0 3px var(--blue); color: var(--blue-deep); }
+  .slot.good { box-shadow: inset 0 0 0 3px var(--green); background: #e9fbe3; color: var(--green); }
+  #tiles { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; min-height: 120px; }
+  .tile {
+    background: var(--pink); color: #fff; box-shadow: 0 4px 0 #e25595; min-width: 52px; min-height: 56px;
+  }
+  .tile:active, .slot:active { transform: translateY(2px); }
+  .tile:focus-visible, .slot:focus-visible, .tools button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  .tile.used { visibility: hidden; }
+  .tools { display: flex; justify-content: center; gap: 10px; margin-top: 18px; }
+  .tools button {
+    appearance: none; border: 0; cursor: pointer; font: inherit; font-weight: 800; font-size: 16px;
+    border-radius: 999px; min-height: 48px; padding: 10px 18px;
+  }
+  #shuffle { background: #fff; color: var(--blue-deep); box-shadow: 0 4px 0 rgba(20,111,186,.28); }
+  #hint { background: var(--green); color: #fff; box-shadow: 0 4px 0 #127a32; }
+  #board.shake { animation: shake .35s ease; }
+  @keyframes shake { 25% { transform: translateX(-6px); } 50% { transform: translateX(6px); } 75% { transform: translateX(-3px); } }
+  footer {
+    margin-top: auto; background: var(--blue); color: #fff; text-align: center; font-weight: 800; letter-spacing: .06em;
+    font-size: clamp(14px, 3.6vw, 20px); padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    box-shadow: inset 0 4px 0 rgba(255,255,255,.25);
+  }
+  .overlay { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(20, 90, 140, .28); }
+  .overlay[hidden] { display: none; }
+  .card {
+    width: min(420px, 100%); background: #fff; border-radius: 28px; padding: 26px 22px 22px; text-align: center;
+    box-shadow: 0 12px 0 rgba(20, 111, 186, .18); border: 4px solid #fff; outline: 3px solid var(--pink);
+  }
+  .card h2 { margin: 8px 0 4px; font-size: clamp(26px, 6vw, 34px); color: var(--green); }
+  .card p { margin: 0 0 16px; color: #17628f; font-weight: 700; }
+  #again {
+    appearance: none; border: 0; background: var(--pink); color: #fff; font: inherit; font-weight: 800; font-size: 18px;
+    border-radius: 999px; min-height: 48px; padding: 12px 28px; cursor: pointer; box-shadow: 0 5px 0 #e25595;
+  }
+  @media (prefers-reduced-motion: reduce) { #board.shake, .bar span { animation: none; transition: none; } }
+</style>
+</head>
+<body>
+  <header>
+    <a class="home" href="../">All games</a>
+    <h1>Word Scramble</h1>
+  </header>
+  <main>
+    <div class="progress-row">
+      <span id="progress">Word 1 of 12</span>
+      <span id="solved-label">0 solved</span>
+    </div>
+    <div class="bar" aria-hidden="true"><span id="bar"></span></div>
+    <p class="clue" id="clue"></p>
+    <div id="board">
+      <div id="slots" data-answer=""></div>
+      <div id="tiles"></div>
+    </div>
+    <div class="tools">
+      <button type="button" id="shuffle">Shuffle</button>
+      <button type="button" id="hint">Hint</button>
+    </div>
+  </main>
+  <footer>TOAD 8 Notaries &amp; Services</footer>
+  <div class="overlay" id="overlay" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="win-title">
+      <h2 id="win-title">You unscrambled them all!</h2>
+      <p>Twelve notary and pond words, letter by letter. Beautiful work.</p>
+      <button type="button" id="again">Play again</button>
+    </div>
+  </div>
+<script>
+(function () {
+  var WORDS = [
+    { word: "NOTARY", clue: "The person who watches you sign" },
+    { word: "STAMP", clue: "Press this onto the ink" },
+    { word: "SEAL", clue: "A drop of wax that closes a letter" },
+    { word: "JURAT", clue: "The notary's short certificate" },
+    { word: "FROG", clue: "A bright green friend by the pond" },
+    { word: "POND", clue: "The water where the picnic happens" },
+    { word: "RIBBON", clue: "Tied in a bow on the basket" },
+    { word: "INKPAD", clue: "The little cushion the stamp kisses" },
+    { word: "AFFIDAVIT", clue: "A sworn statement, written down" },
+    { word: "WITNESS", clue: "Someone who watches the signing" },
+    { word: "LILYPAD", clue: "A round green seat on the water" },
+    { word: "OATH", clue: "A promise you say out loud" }
+  ];
+  var index = 0;
+  var solved = 0;
+  var slots = [];
+  var letters = [];
+  var locked = false;
+  var slotsEl = document.getElementById("slots");
+  var tilesEl = document.getElementById("tiles");
+  var clueEl = document.getElementById("clue");
+  var progressEl = document.getElementById("progress");
+  var solvedEl = document.getElementById("solved-label");
+  var barEl = document.getElementById("bar");
+  var board = document.getElementById("board");
+  var overlay = document.getElementById("overlay");
+
+  function shuffle(list) {
+    var arr = list.slice();
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+    }
+    if (arr.join("") === list.join("") && arr.length > 1) {
+      var first = arr.shift();
+      arr.push(first);
+    }
+    return arr;
+  }
+
+  function render() {
+    var word = WORDS[index].word;
+    slotsEl.dataset.answer = word;
+    slotsEl.innerHTML = "";
+    slots.forEach(function (letter, i) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "slot" + (letter ? " filled" : "");
+      btn.textContent = letter || "";
+      btn.setAttribute("aria-label", letter ? "Remove " + letter : "Empty space " + (i + 1));
+      btn.addEventListener("click", function () { removeAt(i); });
+      slotsEl.appendChild(btn);
+    });
+    tilesEl.innerHTML = "";
+    letters.forEach(function (item, i) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "tile" + (item.used ? " used" : "");
+      btn.textContent = item.letter;
+      btn.disabled = item.used || locked;
+      btn.setAttribute("aria-label", "Letter " + item.letter);
+      btn.addEventListener("click", function () { place(i); });
+      tilesEl.appendChild(btn);
+    });
+    clueEl.textContent = WORDS[index].clue;
+    progressEl.textContent = "Word " + (index + 1) + " of " + WORDS.length;
+    solvedEl.textContent = solved + " solved";
+    barEl.style.width = (solved / WORDS.length * 100) + "%";
+  }
+
+  function loadWord() {
+    var word = WORDS[index].word;
+    slots = word.split("").map(function () { return null; });
+    letters = shuffle(word.split("")).map(function (letter) { return { letter: letter, used: false }; });
+    locked = false;
+    render();
+  }
+
+  function place(i) {
+    if (locked || letters[i].used) return;
+    var empty = slots.indexOf(null);
+    if (empty < 0) return;
+    letters[i].used = true;
+    slots[empty] = letters[i].letter;
+    render();
+    check();
+  }
+
+  function removeAt(i) {
+    if (locked || !slots[i]) return;
+    var letter = slots[i];
+    slots[i] = null;
+    for (var n = 0; n < letters.length; n++) {
+      if (letters[n].used && letters[n].letter === letter) {
+        letters[n].used = false;
+        break;
+      }
+    }
+    render();
+  }
+
+  function check() {
+    if (slots.indexOf(null) !== -1) return;
+    var word = WORDS[index].word;
+    if (slots.join("") !== word) {
+      board.classList.remove("shake");
+      void board.offsetWidth;
+      board.classList.add("shake");
+      return;
+    }
+    locked = true;
+    slotsEl.querySelectorAll(".slot").forEach(function (el) { el.classList.add("good"); });
+    solved += 1;
+    barEl.style.width = (solved / WORDS.length * 100) + "%";
+    solvedEl.textContent = solved + " solved";
+    if (solved === WORDS.length) {
+      setTimeout(function () { overlay.hidden = false; document.getElementById("again").focus(); }, 350);
+      return;
+    }
+    setTimeout(function () {
+      index += 1;
+      loadWord();
+    }, 650);
+  }
+
+  document.getElementById("shuffle").addEventListener("click", function () {
+    if (locked) return;
+    var unused = letters.filter(function (item) { return !item.used; });
+    var mixed = shuffle(unused.map(function (item) { return item.letter; }));
+    var n = 0;
+    letters.forEach(function (item) {
+      if (!item.used) item.letter = mixed[n++];
+    });
+    render();
+  });
+
+  document.getElementById("hint").addEventListener("click", function () {
+    if (locked) return;
+    var word = WORDS[index].word;
+    for (var i = 0; i < word.length; i++) {
+      if (slots[i] === word.charAt(i)) continue;
+      if (slots[i]) removeAt(i);
+      for (var n = 0; n < letters.length; n++) {
+        if (!letters[n].used && letters[n].letter === word.charAt(i)) {
+          place(n);
+          return;
+        }
+      }
+    }
+  });
+
+  document.getElementById("again").addEventListener("click", function () {
+    index = 0;
+    solved = 0;
+    overlay.hidden = true;
+    loadWord();
+  });
+
+  loadWord();
+})();
+</script>
+</body>
+</html>
