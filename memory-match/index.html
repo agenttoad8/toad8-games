@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f93ef">
+<title>Memory Match · TOAD 8</title>
+<meta name="description" content="Flip the cards and match frogs, stamps, and pond treasures. A cozy browser game from TOAD 8 Notaries &amp; Services.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TOAD 8 Brain Games">
+<meta property="og:title" content="Memory Match · TOAD 8">
+<meta property="og:description" content="A flip-card memory game with frogs, stamps, lily pads, and notary tools.">
+<meta property="og:url" content="https://agenttoad8.github.io/toad8-games/memory-match/">
+<meta property="og:image" content="https://agenttoad8.github.io/toad8-games/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="TOAD 8 Brain Games, with a frog hopping across a pond.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Memory Match · TOAD 8">
+<meta name="twitter:description" content="A flip-card memory game with frogs, stamps, lily pads, and notary tools.">
+<meta name="twitter:image" content="https://agenttoad8.github.io/toad8-games/og.png">
+<style>
+  :root {
+    --blue: #1f93ef;
+    --blue-deep: #146fba;
+    --green: #1f9a45;
+    --ink: #145c38;
+    --pink: #ff7eb6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Trebuchet MS", "Segoe UI", "Gill Sans", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 12% 10%, rgba(255,255,255,.85) 0 2px, transparent 3px),
+      linear-gradient(180deg, #fff6df 0%, #e5f6ff 48%, #d9f5c9 100%);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  header { padding: calc(10px + env(safe-area-inset-top)) 16px 0; text-align: center; }
+  .home { color: var(--blue-deep); font-weight: 800; font-size: 14px; text-decoration: none; }
+  h1 { margin: 2px 0 0; font-size: clamp(28px, 7vw, 42px); line-height: 1; color: #128a3d; text-shadow: 0 2px 0 #fff; }
+  #moves { margin: 6px 0 0; font-weight: 800; font-size: 18px; color: var(--blue-deep); }
+  .help { margin: 2px auto 0; max-width: 26em; font-size: 14px; font-weight: 700; color: #17628f; }
+  main { width: min(520px, 100%); margin: 0 auto; padding: 12px 14px 20px; flex: 1; }
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .card {
+    appearance: none; border: 0; padding: 0; background: transparent; cursor: pointer;
+    aspect-ratio: 1; perspective: 700px; border-radius: 18px;
+  }
+  .card:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+  .inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .35s ease; }
+  .card.up .inner, .card.matched .inner { transform: rotateY(180deg); }
+  .face, .back {
+    position: absolute; inset: 0; border-radius: 18px; backface-visibility: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .back {
+    background: linear-gradient(160deg, #ff9ac8, #ff7eb6 55%, #e25595);
+    box-shadow: 0 5px 0 #e25595;
+  }
+  .back svg { width: 46%; height: 46%; }
+  .face { background: #fff; transform: rotateY(180deg); box-shadow: inset 0 0 0 3px #d7eef8, 0 5px 0 rgba(20,111,186,.16); }
+  .card.matched .face { box-shadow: inset 0 0 0 3px var(--green), 0 5px 0 rgba(31,154,69,.25); }
+  .face svg { width: 68%; height: 68%; }
+  footer {
+    margin-top: auto; background: var(--blue); color: #fff; text-align: center; font-weight: 800; letter-spacing: .06em;
+    font-size: clamp(14px, 3.6vw, 20px); padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    box-shadow: inset 0 4px 0 rgba(255,255,255,.25);
+  }
+  .overlay { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(20, 90, 140, .28); }
+  .overlay[hidden] { display: none; }
+  .card-win {
+    width: min(420px, 100%); background: #fff; border-radius: 28px; padding: 26px 22px 22px; text-align: center;
+    box-shadow: 0 12px 0 rgba(20, 111, 186, .18); border: 4px solid #fff; outline: 3px solid var(--pink);
+  }
+  .card-win h2 { margin: 8px 0 4px; font-size: clamp(26px, 6vw, 34px); color: var(--green); }
+  .card-win p { margin: 0 0 16px; color: #17628f; font-weight: 700; }
+  #again {
+    appearance: none; border: 0; background: var(--pink); color: #fff; font: inherit; font-weight: 800; font-size: 18px;
+    border-radius: 999px; min-height: 48px; padding: 12px 28px; cursor: pointer; box-shadow: 0 5px 0 #e25595;
+  }
+  @media (prefers-reduced-motion: reduce) { .inner { transition: none; } }
+</style>
+</head>
+<body>
+  <header>
+    <a class="home" href="../">All games</a>
+    <h1>Memory Match</h1>
+    <p id="moves" aria-live="polite">Moves 0</p>
+    <p class="help">Flip two cards. Match the frogs and notary treasures.</p>
+  </header>
+  <main>
+    <div id="grid"></div>
+  </main>
+  <footer>TOAD 8 Notaries &amp; Services</footer>
+  <div class="overlay" id="overlay" hidden>
+    <div class="card-win" role="dialog" aria-modal="true" aria-labelledby="win-title">
+      <h2 id="win-title">You matched every pair!</h2>
+      <p id="win-moves">Six pairs, neat and tidy.</p>
+      <button type="button" id="again">Play again</button>
+    </div>
+  </div>
+<script>
+(function () {
+  var ICONS = {
+    frog: '<svg viewBox="0 0 80 80" aria-hidden="true"><ellipse cx="40" cy="50" rx="26" ry="18" fill="#3dba4a"/><circle cx="26" cy="32" r="11" fill="#3dba4a"/><circle cx="54" cy="32" r="11" fill="#3dba4a"/><circle cx="26" cy="32" r="5.5" fill="#fff"/><circle cx="54" cy="32" r="5.5" fill="#fff"/><circle cx="27.5" cy="33" r="2.5" fill="#145c38"/><circle cx="55.5" cy="33" r="2.5" fill="#145c38"/><path d="M32 52 Q40 58 48 52" fill="none" stroke="#145c38" stroke-width="2.4" stroke-linecap="round"/><ellipse cx="20" cy="50" rx="5" ry="3" fill="#ff9ac4"/><ellipse cx="60" cy="50" rx="5" ry="3" fill="#ff9ac4"/></svg>',
+    stamp: '<svg viewBox="0 0 80 80" aria-hidden="true"><rect x="34" y="10" width="12" height="28" rx="6" fill="#c9844a"/><rect x="28" y="34" width="24" height="10" rx="4" fill="#a86b34"/><rect x="16" y="46" width="48" height="22" rx="6" fill="#1f9a45"/><rect x="22" y="52" width="36" height="8" rx="3" fill="#7cdb4a"/></svg>',
+    lily: '<svg viewBox="0 0 80 80" aria-hidden="true"><path d="M10 46 C18 28 62 28 70 46 C62 62 18 62 10 46 Z" fill="#3dba4a"/><path d="M40 34 L48 50 L32 50 Z" fill="#e7f8e4"/><path d="M40 22 C44 30 44 36 40 42 C36 36 36 30 40 22 Z" fill="#7cdb4a"/></svg>',
+    ink: '<svg viewBox="0 0 80 80" aria-hidden="true"><rect x="14" y="28" width="52" height="34" rx="8" fill="#146b32"/><rect x="20" y="22" width="40" height="16" rx="6" fill="#1f9a45"/><rect x="28" y="26" width="24" height="6" rx="3" fill="#d9f5c9"/></svg>',
+    seal: '<svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="42" r="24" fill="#e23d4a"/><circle cx="40" cy="42" r="16" fill="none" stroke="#ffd0d4" stroke-width="3"/><path d="M40 32 L43 40 H52 L45 45 L48 54 L40 49 L32 54 L35 45 L28 40 H37 Z" fill="#fff4f5"/></svg>',
+    pen: '<svg viewBox="0 0 80 80" aria-hidden="true"><g transform="rotate(-40 40 40)"><rect x="34" y="12" width="12" height="40" rx="6" fill="#1f9a45"/><rect x="36" y="8" width="8" height="10" rx="3" fill="#c9844a"/><path d="M34 50 L40 68 L46 50 Z" fill="#e7c16a"/></g></svg>'
+  };
+  var NAMES = { frog: "frog", stamp: "stamp", lily: "lily pad", ink: "ink pad", seal: "wax seal", pen: "pen" };
+  var grid = document.getElementById("grid");
+  var movesEl = document.getElementById("moves");
+  var overlay = document.getElementById("overlay");
+  var winMoves = document.getElementById("win-moves");
+  var moves = 0;
+  var lock = false;
+  var first = null;
+  var matched = 0;
+
+  function shuffle(list) {
+    var arr = list.slice();
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  function deal() {
+    moves = 0;
+    lock = false;
+    first = null;
+    matched = 0;
+    movesEl.textContent = "Moves 0";
+    overlay.hidden = true;
+    var pairs = ["frog", "stamp", "lily", "ink", "seal", "pen", "frog", "stamp", "lily", "ink", "seal", "pen"];
+    grid.innerHTML = "";
+    shuffle(pairs).forEach(function (id) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "card";
+      btn.dataset.pair = id;
+      btn.setAttribute("aria-label", "Hidden card");
+      btn.innerHTML = '<span class="inner"><span class="back"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="8" fill="#fff"/><circle cx="16" cy="18" r="2" fill="#e25595"/><circle cx="24" cy="18" r="2" fill="#e25595"/></svg></span><span class="face">' + ICONS[id] + '</span></span>';
+      btn.addEventListener("click", function () { flip(btn); });
+      grid.appendChild(btn);
+    });
+  }
+
+  function flip(card) {
+    if (lock || card.classList.contains("up") || card.classList.contains("matched")) return;
+    card.classList.add("up");
+    card.setAttribute("aria-label", NAMES[card.dataset.pair]);
+    if (!first) {
+      first = card;
+      return;
+    }
+    moves += 1;
+    movesEl.textContent = "Moves " + moves;
+    var prev = first;
+    first = null;
+    if (prev.dataset.pair === card.dataset.pair) {
+      prev.classList.add("matched");
+      card.classList.add("matched");
+      matched += 1;
+      if (matched === 6) {
+        winMoves.textContent = "Six pairs in " + moves + (moves === 1 ? " move." : " moves.");
+        setTimeout(function () {
+          overlay.hidden = false;
+          document.getElementById("again").focus();
+        }, 400);
+      }
+      return;
+    }
+    lock = true;
+    setTimeout(function () {
+      prev.classList.remove("up");
+      card.classList.remove("up");
+      prev.setAttribute("aria-label", "Hidden card");
+      card.setAttribute("aria-label", "Hidden card");
+      lock = false;
+    }, 700);
+  }
+
+  document.getElementById("again").addEventListener("click", deal);
+  deal();
+})();
+</script>
+</body>
+</html>

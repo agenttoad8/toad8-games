@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f93ef">
+<title>Spot the Difference · TOAD 8</title>
+<meta name="description" content="Tap the six changes between two pond picnics. A cozy browser game from TOAD 8 Notaries &amp; Services.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TOAD 8 Brain Games">
+<meta property="og:title" content="Spot the Difference · TOAD 8">
+<meta property="og:description" content="Two pond picnics. Six little changes. Tap each one you spot.">
+<meta property="og:url" content="https://agenttoad8.github.io/toad8-games/spot-the-difference/">
+<meta property="og:image" content="https://agenttoad8.github.io/toad8-games/spot-the-difference/picnic.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="1698">
+<meta property="og:image:alt" content="Two stacked pictures of frogs at a pond picnic.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Spot the Difference · TOAD 8">
+<meta name="twitter:description" content="Two pond picnics. Six little changes. Tap each one you spot.">
+<meta name="twitter:image" content="https://agenttoad8.github.io/toad8-games/spot-the-difference/picnic.png">
+<style>
+  :root {
+    --blue: #1f93ef;
+    --blue-deep: #146fba;
+    --green: #1f9a45;
+    --ink: #145c38;
+    --pink: #ff7eb6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    font-family: "Trebuchet MS", "Segoe UI", "Gill Sans", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at 12% 10%, rgba(255,255,255,.85) 0 2px, transparent 3px),
+      linear-gradient(180deg, #fff6df 0%, #e5f6ff 48%, #d9f5c9 100%);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  header { padding: calc(8px + env(safe-area-inset-top)) 14px 6px; text-align: center; }
+  h1 { margin: 0; font-size: clamp(26px, 7vw, 40px); line-height: 1; color: #128a3d; text-shadow: 0 2px 0 #fff; }
+  .home { color: var(--blue-deep); font-weight: 800; font-size: 14px; text-decoration: none; }
+  #count { margin: 4px 0 0; font-weight: 800; font-size: clamp(18px, 4.5vw, 22px); color: var(--blue-deep); }
+  .help { margin: 2px auto 0; max-width: 28em; font-size: 14px; line-height: 1.3; font-weight: 700; color: #17628f; }
+  .tools { display: flex; justify-content: center; gap: 10px; margin-top: 8px; }
+  .tools button {
+    appearance: none; border: 0; cursor: pointer; font: inherit; font-weight: 800; font-size: 16px;
+    border-radius: 999px; min-height: 44px; padding: 8px 18px;
+  }
+  #hint { background: var(--pink); color: #fff; box-shadow: 0 4px 0 #e25595; }
+  #zoom { background: #fff; color: var(--blue-deep); box-shadow: 0 4px 0 rgba(20, 111, 186, .28); }
+  .tools button:active { transform: translateY(2px); }
+  .tools button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  #stage {
+    flex: 1; min-height: 0; position: relative; margin: 4px 10px 10px; border-radius: 22px; overflow: hidden;
+    touch-action: none; background: #f3e2c4; cursor: pointer;
+    box-shadow: 0 8px 0 rgba(20, 111, 186, .16), 0 16px 30px rgba(20, 90, 40, .12);
+  }
+  #shake { position: absolute; inset: 0; }
+  #board { position: absolute; left: 0; top: 0; }
+  #board img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; -webkit-user-drag: none; }
+  .mark, .pulse, .ripple { position: absolute; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); }
+  .mark {
+    border: 3px solid var(--pink); background: rgba(255, 126, 182, .28);
+    box-shadow: 0 0 0 3px rgba(255,255,255,.85), 0 0 12px rgba(255, 126, 182, .85);
+    animation: pop 280ms ease-out;
+  }
+  @keyframes pop { from { transform: translate(-50%, -50%) scale(.35); opacity: 0; } }
+  .pulse { border: 4px solid var(--pink); box-shadow: 0 0 0 4px rgba(255,255,255,.8); animation: pulse 1.8s ease-in-out; }
+  @keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(.55); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.55); opacity: 0; }
+  }
+  .ripple { width: 18px; height: 18px; border: 3px solid var(--blue); background: rgba(255,255,255,.35); animation: ripple 620ms ease-out forwards; }
+  @keyframes ripple { to { transform: translate(-50%, -50%) scale(3.2); opacity: 0; } }
+  #shake.wiggle { animation: wiggle 420ms ease-in-out; }
+  @keyframes wiggle { 20% { transform: translateX(-4px); } 40% { transform: translateX(4px); } 60% { transform: translateX(-2px); } 80% { transform: translateX(2px); } }
+  footer {
+    background: var(--blue); color: #fff; text-align: center; font-weight: 800; letter-spacing: .06em;
+    font-size: clamp(14px, 3.6vw, 20px); padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    box-shadow: inset 0 4px 0 rgba(255,255,255,.25);
+  }
+  .overlay { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(20, 90, 140, .28); }
+  .overlay[hidden] { display: none; }
+  .card {
+    position: relative; width: min(420px, 100%); background: #fff; border-radius: 28px; padding: 26px 22px 22px; text-align: center;
+    box-shadow: 0 12px 0 rgba(20, 111, 186, .18); border: 4px solid #fff; outline: 3px solid var(--pink);
+  }
+  .card h2 { margin: 8px 0 4px; font-size: clamp(26px, 6vw, 34px); color: var(--green); }
+  .card p { margin: 0 0 16px; color: #17628f; font-weight: 700; }
+  #again {
+    appearance: none; border: 0; background: var(--pink); color: #fff; font: inherit; font-weight: 800; font-size: 18px;
+    border-radius: 999px; min-height: 44px; padding: 12px 28px; cursor: pointer; box-shadow: 0 5px 0 #e25595;
+  }
+  .confetti { position: absolute; top: 8px; width: 8px; height: 12px; border-radius: 2px; animation: fall 900ms ease-in forwards; pointer-events: none; }
+  @keyframes fall { to { transform: translateY(70px) rotate(180deg); opacity: .2; } }
+  @media (prefers-reduced-motion: reduce) {
+    .mark, .pulse, .ripple, #shake.wiggle, .confetti { animation: none; }
+    .pulse { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <a class="home" href="../">All games</a>
+    <h1>Spot the Difference</h1>
+    <p id="count" aria-live="polite">Found 0/6</p>
+    <p class="help">Six things changed between the picnics. Tap a change in either picture.</p>
+    <div class="tools">
+      <button type="button" id="hint">Hint</button>
+      <button type="button" id="zoom" aria-label="Zoom in">Zoom</button>
+    </div>
+  </header>
+  <div id="stage">
+    <div id="shake">
+      <div id="board">
+        <img src="picnic.png" alt="Two pictures of frogs at a pond picnic. Find the six differences." width="1280" height="1698">
+      </div>
+    </div>
+  </div>
+  <footer>TOAD 8 Notaries &amp; Services</footer>
+  <div class="overlay" id="overlay" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="win-title">
+      <div id="confetti"></div>
+      <h2 id="win-title">You found every change!</h2>
+      <p>All six differences were hiding in the picnic. Sharp eyes.</p>
+      <button type="button" id="again">Play again</button>
+    </div>
+  </div>
+<script>
+(function () {
+  var IMG_W = 1280;
+  var IMG_H = 1698;
+  // Two stacked panels, 701px apart. Each difference has a spot in both pictures.
+  var DIFFS = [
+    { id: "dragon", spots: [{ x: 273, y: 265, rx: 80, ry: 70 }, { x: 273, y: 966, rx: 80, ry: 70 }] },
+    { id: "cloud", spots: [{ x: 979, y: 244, rx: 100, ry: 55 }, { x: 979, y: 945, rx: 100, ry: 55 }] },
+    { id: "mug", spots: [{ x: 444, y: 500, rx: 82, ry: 60 }, { x: 444, y: 1201, rx: 82, ry: 60 }] },
+    { id: "ink", spots: [{ x: 665, y: 650, rx: 72, ry: 62 }, { x: 665, y: 1351, rx: 72, ry: 62 }] },
+    { id: "seal", spots: [{ x: 549, y: 715, rx: 68, ry: 48 }, { x: 549, y: 1416, rx: 68, ry: 48 }] },
+    { id: "bow", spots: [{ x: 919, y: 717, rx: 78, ry: 60 }, { x: 919, y: 1418, rx: 78, ry: 60 }] }
+  ];
+
+  var stage = document.getElementById("stage");
+  var shake = document.getElementById("shake");
+  var board = document.getElementById("board");
+  var countEl = document.getElementById("count");
+  var hintBtn = document.getElementById("hint");
+  var zoomBtn = document.getElementById("zoom");
+  var overlay = document.getElementById("overlay");
+  var again = document.getElementById("again");
+  var found = {};
+  var scale = 1;
+  var tx = 0;
+  var ty = 0;
+  var baseW = 1;
+  var baseH = 1;
+  var pointers = new Map();
+  var pinch = null;
+  var pan = null;
+  var TAP_SLOP = 28;
+  var audioCtx = null;
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function tone(freq, dur) {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      var o = audioCtx.createOscillator();
+      var g = audioCtx.createGain();
+      o.type = "triangle";
+      o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.05, audioCtx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+      o.connect(g);
+      g.connect(audioCtx.destination);
+      o.start();
+      o.stop(audioCtx.currentTime + dur + 0.02);
+    } catch (err) { /* sound is optional */ }
+  }
+
+  function layout() {
+    var sw = stage.clientWidth;
+    var sh = stage.clientHeight;
+    var aspect = IMG_W / IMG_H;
+    baseW = sw;
+    baseH = sw / aspect;
+    if (baseH > sh) {
+      baseH = sh;
+      baseW = sh * aspect;
+    }
+    clampPan();
+    apply();
+  }
+
+  function apply() {
+    board.style.width = baseW + "px";
+    board.style.height = baseH + "px";
+    board.style.transform = "translate(" + tx + "px," + ty + "px) scale(" + scale + ")";
+    board.style.transformOrigin = "0 0";
+  }
+
+  function clampPan() {
+    var sw = stage.clientWidth;
+    var sh = stage.clientHeight;
+    var bw = baseW * scale;
+    var bh = baseH * scale;
+    if (bw <= sw) tx = (sw - bw) / 2;
+    else tx = Math.min(0, Math.max(sw - bw, tx));
+    if (bh <= sh) ty = (sh - bh) / 2;
+    else ty = Math.min(0, Math.max(sh - bh, ty));
+  }
+
+  function zoomAbout(next, cx, cy) {
+    var bx = (cx - tx) / scale;
+    var by = (cy - ty) / scale;
+    scale = next;
+    tx = cx - bx * scale;
+    ty = cy - by * scale;
+    clampPan();
+    apply();
+    zoomBtn.textContent = scale > 2.5 ? "Fit" : "Zoom";
+    zoomBtn.setAttribute("aria-label", scale > 2.5 ? "Show both pictures" : "Zoom in");
+  }
+
+  function updateCount() {
+    countEl.textContent = "Found " + Object.keys(found).length + "/6";
+  }
+
+  function place(el, spot, grow) {
+    var g = grow || 1;
+    el.style.left = (spot.x / IMG_W * 100) + "%";
+    el.style.top = (spot.y / IMG_H * 100) + "%";
+    el.style.width = (spot.rx * 2 * g / IMG_W * 100) + "%";
+    el.style.height = (spot.ry * 2 * g / IMG_H * 100) + "%";
+  }
+
+  function mark(diff) {
+    diff.spots.forEach(function (spot) {
+      var el = document.createElement("div");
+      el.className = "mark";
+      el.dataset.id = diff.id;
+      place(el, spot, 0.92);
+      board.appendChild(el);
+    });
+  }
+
+  function diffAt(nx, ny) {
+    var px = nx * IMG_W;
+    var py = ny * IMG_H;
+    var fresh = null;
+    var freshD = Infinity;
+    var used = null;
+    var usedD = Infinity;
+    DIFFS.forEach(function (diff) {
+      diff.spots.forEach(function (spot) {
+        var dx = (px - spot.x) / spot.rx;
+        var dy = (py - spot.y) / spot.ry;
+        var d = dx * dx + dy * dy;
+        if (d > 1) return;
+        if (!found[diff.id] && d < freshD) {
+          fresh = diff;
+          freshD = d;
+        } else if (found[diff.id] && d < usedD) {
+          used = diff;
+          usedD = d;
+        }
+      });
+    });
+    return fresh || used;
+  }
+
+  function localPoint(clientX, clientY) {
+    var rect = board.getBoundingClientRect();
+    return {
+      x: (clientX - rect.left) / rect.width,
+      y: (clientY - rect.top) / rect.height
+    };
+  }
+
+  function rippleAt(nx, ny) {
+    var el = document.createElement("div");
+    el.className = "ripple";
+    el.style.left = (nx * 100) + "%";
+    el.style.top = (ny * 100) + "%";
+    board.appendChild(el);
+    setTimeout(function () { el.remove(); }, 700);
+    if (!reduced) {
+      shake.classList.remove("wiggle");
+      void shake.offsetWidth;
+      shake.classList.add("wiggle");
+    }
+  }
+
+  function celebrate() {
+    var box = document.getElementById("confetti");
+    box.innerHTML = "";
+    var colors = ["#ff7eb6", "#7cdb4a", "#3db7ff", "#ffe56a", "#fff"];
+    for (var i = 0; i < 18; i++) {
+      var bit = document.createElement("i");
+      bit.className = "confetti";
+      bit.style.left = (8 + Math.random() * 84) + "%";
+      bit.style.background = colors[i % colors.length];
+      bit.style.animationDelay = (Math.random() * 180) + "ms";
+      box.appendChild(bit);
+    }
+    overlay.hidden = false;
+    again.focus();
+    tone(523, 0.12);
+    setTimeout(function () { tone(659, 0.12); }, 120);
+    setTimeout(function () { tone(784, 0.22); }, 240);
+  }
+
+  function tap(clientX, clientY) {
+    if (!overlay.hidden) return;
+    var p = localPoint(clientX, clientY);
+    if (p.x < 0 || p.y < 0 || p.x > 1 || p.y > 1) return;
+    var diff = diffAt(p.x, p.y);
+    if (!diff) {
+      rippleAt(p.x, p.y);
+      tone(220, 0.08);
+      return;
+    }
+    if (found[diff.id]) return;
+    found[diff.id] = true;
+    mark(diff);
+    updateCount();
+    tone(640, 0.1);
+    if (Object.keys(found).length === DIFFS.length) celebrate();
+  }
+
+  function showHint() {
+    if (!overlay.hidden) return;
+    var left = DIFFS.filter(function (diff) { return !found[diff.id]; });
+    if (!left.length) return;
+    var diff = left[Math.floor(Math.random() * left.length)];
+    var spot = diff.spots[0];
+    var fx = (spot.x / IMG_W) * baseW * scale;
+    var fy = (spot.y / IMG_H) * baseH * scale;
+    tx = stage.clientWidth / 2 - fx;
+    ty = stage.clientHeight / 2 - fy;
+    clampPan();
+    apply();
+    diff.spots.forEach(function (s) {
+      var el = document.createElement("div");
+      el.className = "pulse";
+      place(el, s, 1.15);
+      board.appendChild(el);
+      setTimeout(function () { el.remove(); }, 1900);
+    });
+    tone(520, 0.08);
+  }
+
+  function resetGame() {
+    found = {};
+    board.querySelectorAll(".mark, .pulse, .ripple").forEach(function (el) { el.remove(); });
+    overlay.hidden = true;
+    updateCount();
+    scale = 1;
+    tx = 0;
+    ty = 0;
+    layout();
+    zoomBtn.textContent = "Zoom";
+    zoomBtn.setAttribute("aria-label", "Zoom in");
+  }
+
+  function pinchDist() {
+    var pts = Array.from(pointers.values());
+    return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
+  }
+
+  function pinchMid() {
+    var pts = Array.from(pointers.values());
+    var rect = stage.getBoundingClientRect();
+    return {
+      x: (pts[0].x + pts[1].x) / 2 - rect.left,
+      y: (pts[0].y + pts[1].y) / 2 - rect.top
+    };
+  }
+
+  stage.addEventListener("touchstart", function (e) {
+    if (e.cancelable) e.preventDefault();
+  }, { passive: false });
+
+  stage.addEventListener("pointerdown", function (e) {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    if (e.cancelable) e.preventDefault();
+    stage.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 2) {
+      var mid = pinchMid();
+      pinch = { dist: pinchDist(), scale: scale, tx: tx, ty: ty, mid: mid };
+      pan = null;
+    } else {
+      var rect = stage.getBoundingClientRect();
+      pan = {
+        x: e.clientX, y: e.clientY, downX: e.clientX, downY: e.clientY,
+        tx: tx, ty: ty, moved: 0, pinched: false,
+        sx: e.clientX - rect.left, sy: e.clientY - rect.top
+      };
+    }
+  });
+
+  stage.addEventListener("pointermove", function (e) {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size >= 2 && pinch) {
+      var dist = pinchDist();
+      var mid = pinchMid();
+      var next = Math.min(4, Math.max(1, pinch.scale * (dist / pinch.dist)));
+      var bx = (pinch.mid.x - pinch.tx) / pinch.scale;
+      var by = (pinch.mid.y - pinch.ty) / pinch.scale;
+      scale = next;
+      tx = mid.x - bx * scale;
+      ty = mid.y - by * scale;
+      clampPan();
+      apply();
+      if (pan) pan.pinched = true;
+      zoomBtn.textContent = scale > 2.5 ? "Fit" : "Zoom";
+      return;
+    }
+    if (!pan) return;
+    pan.moved = Math.hypot(e.clientX - pan.x, e.clientY - pan.y);
+    if (scale > 1.02 && pan.moved > TAP_SLOP) {
+      tx = pan.tx + (e.clientX - pan.x);
+      ty = pan.ty + (e.clientY - pan.y);
+      clampPan();
+      apply();
+    }
+  });
+
+  function endPointer(e, allowTap) {
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) pinch = null;
+    if (pointers.size === 0 && pan) {
+      if (allowTap && !pan.pinched && pan.moved <= TAP_SLOP) tap(pan.downX, pan.downY);
+      pan = null;
+    }
+  }
+  stage.addEventListener("pointerup", function (e) { endPointer(e, true); });
+  stage.addEventListener("pointercancel", function (e) { endPointer(e, true); });
+
+  hintBtn.addEventListener("click", showHint);
+  zoomBtn.addEventListener("click", function () {
+    var rect = stage.getBoundingClientRect();
+    var next = scale < 1.5 ? 2 : scale < 2.5 ? 3 : 1;
+    zoomAbout(next, rect.width / 2, rect.height / 2);
+  });
+  again.addEventListener("click", resetGame);
+  window.addEventListener("resize", layout);
+  layout();
+})();
+</script>
+</body>
+</html>
