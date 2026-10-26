@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2d6fca">
+<title>Help Ted Hop to the Pond! · TOAD 8</title>
+<meta name="description" content="Drag Ted through the maze to the lily pond. A Maze Monday game from TOAD 8 Notaries &amp; Services.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TOAD 8 Brain Games">
+<meta property="og:title" content="Help Ted Hop to the Pond! · TOAD 8">
+<meta property="og:description" content="Start at Ted and find the one path to the pond.">
+<meta property="og:url" content="https://agenttoad8.github.io/toad8-games/maze/">
+<meta property="og:image" content="https://agenttoad8.github.io/toad8-games/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="TOAD 8 Brain Games, with a frog hopping across a pond.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Help Ted Hop to the Pond! · TOAD 8">
+<meta name="twitter:description" content="Start at Ted and find the one path to the pond.">
+<meta name="twitter:image" content="https://agenttoad8.github.io/toad8-games/og.png">
+<style>
+  :root {
+    --green: #4caf50;
+    --green-deep: #1e5a28;
+    --blue: #2d6fca;
+    --pink: #ec5e98;
+    --paper: #f0fbec;
+    --wash: #e8f7e2;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; max-width: 100%; }
+  body {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    font-family: "Trebuchet MS", "Segoe UI", "Gill Sans", sans-serif;
+    color: var(--green-deep);
+    background: var(--wash);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  header { padding: calc(6px + env(safe-area-inset-top)) 12px 0; text-align: center; }
+  .home { color: var(--blue); font-weight: 800; font-size: 13px; text-decoration: none; }
+  h1 {
+    margin: 2px 0 0;
+    font-size: clamp(22px, 6.2vw, 36px);
+    line-height: 1.05;
+    color: var(--green);
+    text-shadow: 0 2px 0 #fff;
+  }
+  .sub { margin: 2px 0 0; font-weight: 800; color: var(--pink); font-size: clamp(13px, 3.4vw, 16px); }
+  .help { margin: 1px 0 0; font-weight: 700; color: var(--blue); font-size: 13px; }
+  #stage {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    container-type: size;
+    display: grid;
+    place-items: center;
+    padding: 4px 8px 0;
+  }
+  #board {
+    width: min(100cqw, 100cqh);
+    height: min(100cqw, 100cqh);
+    max-width: 100%;
+    touch-action: none;
+  }
+  #maze { width: 100%; height: 100%; display: block; }
+  .controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 4px 10px 6px;
+  }
+  .meta { margin: 0; font-weight: 800; color: var(--blue); font-size: 16px; }
+  .tools { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  button {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 800;
+    border-radius: 999px;
+  }
+  .tools button, #again {
+    min-height: 44px;
+    padding: 8px 14px;
+    font-size: 15px;
+  }
+  #reset { background: #fff; color: var(--blue); box-shadow: 0 3px 0 rgba(45, 111, 202, .28); }
+  #show { background: var(--pink); color: #fff; box-shadow: 0 3px 0 #c43d78; }
+  button:active { transform: translateY(2px); }
+  button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  .pad {
+    display: grid;
+    grid-template-columns: 44px 44px 44px;
+    grid-template-areas: ". u ." "l . r" ". d .";
+    gap: 4px;
+    justify-content: center;
+  }
+  .pad button {
+    width: 44px;
+    height: 44px;
+    background: #fff;
+    color: var(--blue);
+    box-shadow: 0 3px 0 rgba(45, 111, 202, .25);
+    font-size: 18px;
+  }
+  #up { grid-area: u; }
+  #left { grid-area: l; }
+  #right { grid-area: r; }
+  #down { grid-area: d; }
+  footer {
+    background: var(--blue);
+    color: #fff;
+    text-align: center;
+    font-weight: 800;
+    letter-spacing: .06em;
+    font-size: clamp(14px, 3.6vw, 18px);
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    box-shadow: inset 0 4px 0 rgba(255,255,255,.25);
+  }
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(20, 70, 140, .28);
+  }
+  .overlay[hidden] { display: none; }
+  .card {
+    width: min(420px, 100%);
+    background: #fff;
+    border-radius: 28px;
+    padding: 26px 22px 22px;
+    text-align: center;
+    box-shadow: 0 12px 0 rgba(45, 111, 202, .18);
+    border: 4px solid #fff;
+    outline: 3px solid var(--pink);
+  }
+  .card h2 { margin: 8px 0 4px; font-size: clamp(26px, 6vw, 34px); color: var(--green); }
+  .card p { margin: 0 0 16px; color: var(--blue); font-weight: 700; }
+  #again { background: var(--pink); color: #fff; box-shadow: 0 5px 0 #c43d78; font-size: 18px; }
+</style>
+</head>
+<body>
+  <header>
+    <a class="home" href="../">All games</a>
+    <h1>Help Ted Hop to the Pond!</h1>
+    <p class="sub">TOAD 8 Brain Game · Maze Monday</p>
+    <p class="help">Start at Ted, find the one path to the pond!</p>
+  </header>
+  <div id="stage">
+    <div id="board" data-cell="0,0">
+      <svg id="maze" viewBox="0 0 760 760" data-ox="86" data-oy="78" data-cs="48" data-n="12" role="application" aria-label="Maze. Ted starts at the top left. The pond is at the bottom right.">
+        <rect x="8" y="8" width="744" height="744" rx="28" fill="#f0fbec" stroke="#4caf50" stroke-width="6"/>
+        <rect x="62" y="54" width="624" height="624" rx="22" fill="#fff" stroke="#ec5e98" stroke-width="5"/>
+        <g id="walls" fill="none" stroke="#2d6fca" stroke-width="8" stroke-linecap="square"></g>
+        <g id="dots" fill="#2d6fca"></g>
+        <polyline id="hint" fill="none" stroke="#ec5e98" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0"></polyline>
+        <polyline id="trail" fill="none" stroke="#ec5e98" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"></polyline>
+        <g id="ted"></g>
+        <g id="start-ted" transform="translate(40,102)"></g>
+        <g id="pond" transform="translate(708,678)"></g>
+        <text x="18" y="132" fill="#ec5e98" font-family="Trebuchet MS, Segoe UI, sans-serif" font-size="15" font-weight="700">START</text>
+        <text x="676" y="712" fill="#ec5e98" font-family="Trebuchet MS, Segoe UI, sans-serif" font-size="15" font-weight="700">FINISH</text>
+      </svg>
+    </div>
+  </div>
+  <div class="controls">
+    <p class="meta" id="moves" aria-live="polite">Moves 0</p>
+    <div class="pad">
+      <button type="button" id="up" aria-label="Hop up">↑</button>
+      <button type="button" id="left" aria-label="Hop left">←</button>
+      <button type="button" id="right" aria-label="Hop right">→</button>
+      <button type="button" id="down" aria-label="Hop down">↓</button>
+    </div>
+    <div class="tools">
+      <button type="button" id="reset">Reset</button>
+      <button type="button" id="show" aria-pressed="false">Show path</button>
+    </div>
+  </div>
+  <footer>TOAD 8 Notaries &amp; Services</footer>
+  <div class="overlay" id="overlay" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="win-title">
+      <h2 id="win-title">Ribbit! Ted made it home!</h2>
+      <p id="win-moves">The one path led straight to the pond.</p>
+      <button type="button" id="again">Play again</button>
+    </div>
+  </div>
+<script>
+(function () {
+  // 12x12 maze from seed 20261026. Bits: N=1 S=2 E=4 W=8.
+  var N = 12;
+  var WALLS = [
+    5,9,5,9,3,3,1,3,3,5,11,5,
+    12,12,14,12,9,3,6,9,5,10,5,12,
+    12,10,5,12,12,11,1,4,14,9,6,12,
+    10,5,8,6,10,5,14,8,3,6,11,4,
+    9,6,10,3,5,10,5,10,5,11,1,4,
+    12,11,3,5,12,13,12,13,10,3,6,12,
+    10,3,5,10,2,4,12,8,7,9,5,12,
+    9,5,10,5,11,6,12,10,3,6,10,6,
+    12,10,7,12,9,5,10,3,3,3,1,5,
+    12,9,3,6,12,12,9,5,9,5,14,12,
+    12,10,3,3,6,10,6,10,6,10,5,12,
+    10,3,3,3,3,3,3,3,3,3,2,2
+  ];
+  var PATH = [[0,0],[1,0],[2,0],[3,0],[3,1],[4,1],[4,0],[5,0],[6,0],[6,1],[6,2],[7,2],[7,3],[8,3],[9,3],[9,2],[9,1],[10,1],[10,2],[10,3],[10,4],[9,4],[8,4],[8,5],[9,5],[10,5],[10,6],[9,6],[9,7],[10,7],[10,8],[9,8],[9,9],[10,9],[10,10],[11,10],[11,11]];
+  var BIT = { N: 1, S: 2, E: 4, W: 8 };
+  var STEP = { N: [-1, 0], S: [1, 0], E: [0, 1], W: [0, -1] };
+  var OX = 86, OY = 78, CS = 48;
+  var svg = document.getElementById("maze");
+  var board = document.getElementById("board");
+  var trailEl = document.getElementById("trail");
+  var hintEl = document.getElementById("hint");
+  var ted = document.getElementById("ted");
+  var movesEl = document.getElementById("moves");
+  var overlay = document.getElementById("overlay");
+  var winMoves = document.getElementById("win-moves");
+  var showBtn = document.getElementById("show");
+  var pos = [0, 0];
+  var trail = [[0, 0]];
+  var moves = 0;
+  var won = false;
+  var showPath = false;
+  var drag = null;
+
+  function bit(r, c) { return WALLS[r * N + c]; }
+  function openToward(r, c, dir) { return (bit(r, c) & BIT[dir]) === 0; }
+
+  function center(r, c) {
+    return [OX + c * CS + CS / 2, OY + r * CS + CS / 2];
+  }
+
+  function frogMarkup(scale) {
+    return '<g transform="scale(' + scale + ')">' +
+      '<ellipse cx="0" cy="10" rx="16" ry="11" fill="#6ed24a"/>' +
+      '<ellipse cx="0" cy="12" rx="9" ry="7" fill="#e7f6c4"/>' +
+      '<circle cx="0" cy="-6" r="13" fill="#7cdb4a"/>' +
+      '<circle cx="-6" cy="-8" r="5.2" fill="#fff" stroke="#1a1a1a" stroke-width="1.6"/>' +
+      '<circle cx="6" cy="-8" r="5.2" fill="#fff" stroke="#1a1a1a" stroke-width="1.6"/>' +
+      '<path d="M-1,-8 H1" stroke="#1a1a1a" stroke-width="1.6"/>' +
+      '<circle cx="-5.2" cy="-7.6" r="2.1" fill="#1a1a1a"/>' +
+      '<circle cx="6.8" cy="-7.6" r="2.1" fill="#1a1a1a"/>' +
+      '<path d="M-4,-1 Q0,3 4,-1" fill="none" stroke="#145c38" stroke-width="1.4" stroke-linecap="round"/>' +
+      '<ellipse cx="-12" cy="6" rx="4" ry="2.2" fill="#ff9ac4"/>' +
+      '<ellipse cx="12" cy="6" rx="4" ry="2.2" fill="#ff9ac4"/>' +
+      '<path d="M-14,2 Q-22,-10 -12,-14" fill="none" stroke="#6ed24a" stroke-width="3" stroke-linecap="round"/>' +
+      '</g>';
+  }
+
+  function drawStatic() {
+    var walls = document.getElementById("walls");
+    var dots = document.getElementById("dots");
+    var lines = "";
+    var i, r, c, x, y;
+    for (r = 0; r < N; r++) {
+      for (c = 0; c < N; c++) {
+        x = OX + c * CS;
+        y = OY + r * CS;
+        var w = bit(r, c);
+        if (w & 1) lines += '<line x1="' + x + '" y1="' + y + '" x2="' + (x + CS) + '" y2="' + y + '"/>';
+        if (w & 8) lines += '<line x1="' + x + '" y1="' + y + '" x2="' + x + '" y2="' + (y + CS) + '"/>';
+        if (r === N - 1 && (w & 2)) lines += '<line x1="' + x + '" y1="' + (y + CS) + '" x2="' + (x + CS) + '" y2="' + (y + CS) + '"/>';
+        if (c === N - 1 && (w & 4)) lines += '<line x1="' + (x + CS) + '" y1="' + y + '" x2="' + (x + CS) + '" y2="' + (y + CS) + '"/>';
+      }
+    }
+    walls.innerHTML = lines;
+    var dot = "";
+    for (r = 0; r <= N; r++) {
+      for (c = 0; c <= N; c++) {
+        x = OX + c * CS;
+        y = OY + r * CS;
+        dot += '<circle cx="' + x + '" cy="' + y + '" r="4.2"/>';
+      }
+    }
+    dots.innerHTML = dot;
+    document.getElementById("start-ted").innerHTML = frogMarkup(1.15);
+    document.getElementById("pond").innerHTML =
+      '<ellipse cx="0" cy="6" rx="30" ry="12" fill="#c4a574"/>' +
+      '<ellipse cx="0" cy="2" rx="24" ry="16" fill="#8d6b45"/>' +
+      '<ellipse cx="0" cy="0" rx="20" ry="13" fill="#3db7ef"/>' +
+      '<ellipse cx="-4" cy="2" rx="10" ry="6" fill="#3dba4a"/>' +
+      '<circle cx="6" cy="-2" r="4" fill="#ec5e98"/>' +
+      '<circle cx="10" cy="1" r="3.2" fill="#ff9ac4"/>' +
+      '<circle cx="3" cy="-5" r="3.2" fill="#ffb3d1"/>' +
+      '<circle cx="7" cy="-1" r="2" fill="#ffe56a"/>' +
+      '<path d="M12,-8 Q16,-16 10,-12" fill="#3dba4a"/>';
+    ted.innerHTML = frogMarkup(0.72);
+    var pts = PATH.map(function (p) { var xy = center(p[0], p[1]); return xy[0] + "," + xy[1]; }).join(" ");
+    hintEl.setAttribute("points", pts);
+  }
+
+  function render() {
+    var pts = trail.map(function (p) { var xy = center(p[0], p[1]); return xy[0] + "," + xy[1]; }).join(" ");
+    trailEl.setAttribute("points", pts);
+    var xy = center(pos[0], pos[1]);
+    ted.setAttribute("transform", "translate(" + xy[0] + "," + (xy[1] - 2) + ")");
+    movesEl.textContent = "Moves " + moves;
+    board.dataset.cell = pos[0] + "," + pos[1];
+    hintEl.setAttribute("opacity", showPath ? "0.45" : "0");
+  }
+
+  function reset() {
+    pos = [0, 0];
+    trail = [[0, 0]];
+    moves = 0;
+    won = false;
+    overlay.hidden = true;
+    render();
+  }
+
+  function finish() {
+    won = true;
+    winMoves.textContent = "Ted hopped the path in " + moves + (moves === 1 ? " move." : " moves.");
+    overlay.hidden = false;
+    document.getElementById("again").focus();
+  }
+
+  function step(nr, nc) {
+    if (won) return false;
+    if (nr < 0 || nc < 0 || nr >= N || nc >= N) return false;
+    if (Math.abs(nr - pos[0]) + Math.abs(nc - pos[1]) !== 1) return false;
+    var dir = nr < pos[0] ? "N" : nr > pos[0] ? "S" : nc > pos[1] ? "E" : "W";
+    if (!openToward(pos[0], pos[1], dir)) return false;
+    var idx = -1;
+    for (var i = 0; i < trail.length; i++) {
+      if (trail[i][0] === nr && trail[i][1] === nc) idx = i;
+    }
+    if (idx >= 0) trail = trail.slice(0, idx + 1);
+    else trail.push([nr, nc]);
+    pos = [nr, nc];
+    moves += 1;
+    render();
+    if (nr === N - 1 && nc === N - 1) finish();
+    return true;
+  }
+
+  function moveDir(dir) {
+    var d = STEP[dir];
+    step(pos[0] + d[0], pos[1] + d[1]);
+  }
+
+  function cellAt(clientX, clientY) {
+    var pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    var p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    var c = Math.floor((p.x - OX) / CS);
+    var r = Math.floor((p.y - OY) / CS);
+    if (r < 0 || c < 0 || r >= N || c >= N) return null;
+    return [r, c];
+  }
+
+  function lineCells(r0, c0, r1, c1) {
+    var cells = [];
+    var dr = Math.abs(r1 - r0);
+    var dc = Math.abs(c1 - c0);
+    var sr = r0 < r1 ? 1 : -1;
+    var sc = c0 < c1 ? 1 : -1;
+    var err = dr - dc;
+    var r = r0;
+    var c = c0;
+    while (true) {
+      cells.push([r, c]);
+      if (r === r1 && c === c1) break;
+      var e2 = 2 * err;
+      if (e2 > -dc) { err -= dc; r += sr; }
+      if (e2 < dr) { err += dc; c += sc; }
+    }
+    return cells;
+  }
+
+  function walkTo(r, c) {
+    if (r === pos[0] && c === pos[1]) return;
+    var cells = lineCells(pos[0], pos[1], r, c);
+    for (var i = 1; i < cells.length; i++) {
+      var prev = cells[i - 1];
+      var next = cells[i];
+      if (prev[0] !== pos[0] || prev[1] !== pos[1]) return;
+      if (Math.abs(next[0] - prev[0]) + Math.abs(next[1] - prev[1]) !== 1) return;
+      if (!step(next[0], next[1])) return;
+    }
+  }
+
+  board.addEventListener("touchstart", function (e) {
+    if (e.cancelable) e.preventDefault();
+  }, { passive: false });
+  board.addEventListener("touchmove", function (e) {
+    if (e.cancelable) e.preventDefault();
+  }, { passive: false });
+
+  board.addEventListener("pointerdown", function (e) {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    if (won) return;
+    board.setPointerCapture(e.pointerId);
+    drag = { x: e.clientX, y: e.clientY, moved: 0 };
+  });
+  board.addEventListener("pointermove", function (e) {
+    if (!drag) return;
+    drag.moved = Math.hypot(e.clientX - drag.x, e.clientY - drag.y);
+    if (drag.moved < 8) return;
+    var cell = cellAt(e.clientX, e.clientY);
+    if (cell) walkTo(cell[0], cell[1]);
+  });
+  function endDrag(e) {
+    if (!drag) return;
+    var info = drag;
+    drag = null;
+    if (info.moved <= 28) {
+      var cell = cellAt(e.clientX, e.clientY);
+      if (cell) step(cell[0], cell[1]);
+    }
+  }
+  board.addEventListener("pointerup", endDrag);
+  board.addEventListener("pointercancel", function () { drag = null; });
+
+  document.getElementById("up").addEventListener("click", function () { moveDir("N"); });
+  document.getElementById("down").addEventListener("click", function () { moveDir("S"); });
+  document.getElementById("left").addEventListener("click", function () { moveDir("W"); });
+  document.getElementById("right").addEventListener("click", function () { moveDir("E"); });
+  document.addEventListener("keydown", function (e) {
+    var map = { ArrowUp: "N", ArrowDown: "S", ArrowLeft: "W", ArrowRight: "E" };
+    if (!map[e.key]) return;
+    e.preventDefault();
+    moveDir(map[e.key]);
+  });
+  document.getElementById("reset").addEventListener("click", reset);
+  document.getElementById("again").addEventListener("click", reset);
+  showBtn.addEventListener("click", function () {
+    showPath = !showPath;
+    showBtn.textContent = showPath ? "Hide path" : "Show path";
+    showBtn.setAttribute("aria-pressed", showPath ? "true" : "false");
+    render();
+  });
+
+  drawStatic();
+  render();
+})();
+</script>
+</body>
+</html>
