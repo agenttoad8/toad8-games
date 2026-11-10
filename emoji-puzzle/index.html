@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f93ef">
+<title>Frog Emoji Puzzle · TOAD 8</title>
+<meta name="description" content="Guess each fall and notary word from the emoji clues. A Monday brain game from TOAD 8 Notaries &amp; Services.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TOAD 8 Brain Games">
+<meta property="og:title" content="Frog Emoji Puzzle · TOAD 8">
+<meta property="og:description" content="Guess each word or phrase from the emoji clues.">
+<meta property="og:url" content="https://agenttoad8.github.io/toad8-games/emoji-puzzle/">
+<meta property="og:image" content="https://agenttoad8.github.io/toad8-games/emoji-puzzle/meadow.jpg">
+<meta property="og:image:width" content="720">
+<meta property="og:image:height" content="960">
+<meta property="og:image:alt" content="Ted the frog holding a pumpkin on a lily pad in an autumn meadow.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Frog Emoji Puzzle · TOAD 8">
+<meta name="twitter:description" content="Guess each word or phrase from the emoji clues.">
+<meta name="twitter:image" content="https://agenttoad8.github.io/toad8-games/emoji-puzzle/meadow.jpg">
+<style>
+  :root {
+    --blue: #1f93ef;
+    --blue-deep: #146fba;
+    --green: #1f9a45;
+    --ink: #145c38;
+    --pink: #ff7eb6;
+    --cream: #fff8ee;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; max-width: 100%; }
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Trebuchet MS", "Segoe UI", "Gill Sans", sans-serif;
+    color: var(--ink);
+    background:
+      linear-gradient(180deg, rgba(255, 246, 223, .94) 0%, rgba(233, 248, 220, .94) 100%);
+    -webkit-tap-highlight-color: transparent;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    text-align: center;
+    padding: calc(8px + env(safe-area-inset-top)) 14px 8px;
+    background: rgba(255, 246, 223, .94);
+  }
+  .home { color: var(--blue-deep); font-weight: 800; font-size: 14px; text-decoration: none; }
+  h1 {
+    margin: 2px 0 0;
+    font-size: clamp(28px, 7.4vw, 42px);
+    line-height: 1.02;
+    color: #128a3d;
+    text-shadow: 0 2px 0 #fff;
+  }
+  .sub { margin: 4px 0 0; font-weight: 800; color: #8a4b12; font-size: 15px; }
+  #score { margin: 2px 0 0; font-weight: 800; font-size: 20px; color: var(--blue-deep); }
+  .banner {
+    height: 168px;
+    margin: 4px 14px 0;
+    border-radius: 24px;
+    background: #f3d7a2 url("meadow.jpg") center 82% / cover no-repeat;
+    border: 4px solid #fff;
+    outline: 3px solid var(--pink);
+    box-shadow: 0 8px 0 rgba(20, 111, 186, .14);
+  }
+  main { width: min(560px, 100%); margin: 0 auto; padding: 12px 14px 28px; flex: 1; }
+  .clues { display: flex; flex-direction: column; gap: 12px; }
+  .clue {
+    background: var(--cream);
+    border-radius: 22px;
+    padding: 12px 12px 14px;
+    border: 3px solid #fff;
+    outline: 3px solid var(--green);
+    box-shadow: 0 6px 0 rgba(20, 111, 186, .1);
+  }
+  .clue.solved { outline-color: var(--green); background: #f3fbea; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .num {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--pink); color: #fff; font-weight: 800; flex: none;
+  }
+  .tag {
+    font-size: 12px; font-weight: 800; letter-spacing: .04em;
+    color: #fff; background: var(--green); border-radius: 999px; padding: 4px 8px;
+  }
+  .tag.fall { background: #e07a2f; }
+  .emojis { margin: 8px 0 2px; font-size: 40px; line-height: 1.15; letter-spacing: .04em; }
+  .letters { margin: 0 0 8px; font-weight: 800; color: #8a4b12; font-size: 14px; }
+  input {
+    width: 100%;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--ink);
+    border: 0;
+    border-radius: 14px;
+    min-height: 48px;
+    padding: 10px 12px;
+    background: #fff;
+    box-shadow: inset 0 0 0 3px #d7eef8;
+  }
+  input:focus { outline: none; box-shadow: inset 0 0 0 3px var(--blue); }
+  .clue.solved input { box-shadow: inset 0 0 0 3px var(--green); background: #fff; }
+  .clue.miss input { box-shadow: inset 0 0 0 3px var(--pink); }
+  .actions { display: flex; gap: 8px; margin-top: 8px; }
+  .actions button, #again {
+    appearance: none; border: 0; cursor: pointer; font: inherit; font-weight: 800;
+    border-radius: 999px; min-height: 44px;
+  }
+  .actions button { flex: 1; font-size: 15px; padding: 8px 10px; }
+  .hint { background: #fff; color: var(--blue-deep); box-shadow: 0 3px 0 rgba(20, 111, 186, .25); }
+  .reveal { background: var(--pink); color: #fff; box-shadow: 0 3px 0 #e25595; }
+  .actions button:active, #again:active { transform: translateY(2px); }
+  .actions button:focus-visible, #again:focus-visible, input:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  .note { min-height: 1.2em; margin: 6px 0 0; font-weight: 800; font-size: 14px; color: var(--blue-deep); }
+  .clue.solved .note { color: var(--green); }
+  footer {
+    margin-top: auto;
+    background: var(--blue);
+    color: #fff;
+    text-align: center;
+    font-weight: 800;
+    letter-spacing: .06em;
+    font-size: clamp(14px, 3.6vw, 20px);
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    box-shadow: inset 0 4px 0 rgba(255,255,255,.25);
+  }
+  .overlay {
+    position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center;
+    padding: 24px; background: rgba(20, 90, 140, .28);
+  }
+  .overlay[hidden] { display: none; }
+  .card {
+    width: min(420px, 100%); background: #fff; border-radius: 28px; padding: 26px 22px 22px; text-align: center;
+    box-shadow: 0 12px 0 rgba(20, 111, 186, .18); border: 4px solid #fff; outline: 3px solid var(--pink);
+  }
+  .card h2 { margin: 8px 0 4px; font-size: clamp(26px, 6vw, 34px); color: var(--green); }
+  .card p { margin: 0 0 16px; color: #17628f; font-weight: 700; }
+  #again { background: var(--pink); color: #fff; font-size: 18px; padding: 12px 28px; box-shadow: 0 5px 0 #e25595; }
+</style>
+</head>
+<body>
+  <header>
+    <a class="home" href="../">All games</a>
+    <h1>Frog Emoji Puzzle!</h1>
+    <p class="sub">Guess each word or phrase from the emoji clues</p>
+    <p id="score" aria-live="polite">0/6</p>
+  </header>
+  <div class="banner" role="img" aria-label="Ted the frog, with round glasses, holding a pumpkin on a lily pad."></div>
+  <main>
+    <div class="clues" id="clues"></div>
+  </main>
+  <footer>TOAD 8 Notaries &amp; Services</footer>
+  <div class="overlay" id="overlay" hidden>
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="win-title">
+      <h2 id="win-title">Ribbit! You solved them all!</h2>
+      <p>Six fall and notary clues, all figured out.</p>
+      <button type="button" id="again">Play again</button>
+    </div>
+  </div>
+<script>
+(function () {
+  var CLUES = [
+    { emoji: "👍 + 🖨️", tag: "Notary & Biz", fall: false, letters: "10 letters", answer: "thumbprint", show: "Thumbprint" },
+    { emoji: "🪧 + 🌳🌼", tag: "Notary & Biz", fall: false, letters: "9 letters", answer: "signature", show: "Signature" },
+    { emoji: "💼 + 🃏", tag: "Notary & Biz", fall: false, letters: "8 + 4 letters", answer: "businesscard", show: "Business card" },
+    { emoji: "🎃 + 🥧", tag: "Fall Fun", fall: true, letters: "7 + 3 letters", answer: "pumpkinpie", show: "Pumpkin pie" },
+    { emoji: "🌠 + 🦴", tag: "Fall Fun", fall: true, letters: "8 letters", answer: "wishbone", show: "Wishbone" },
+    { emoji: "🅰️ + 🌽", tag: "Fall Fun", fall: true, letters: "5 letters", answer: "acorn", show: "Acorn" }
+  ];
+  var root = document.getElementById("clues");
+  var scoreEl = document.getElementById("score");
+  var overlay = document.getElementById("overlay");
+  var solved = 0;
+
+  function norm(value) {
+    return String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  }
+
+  function updateScore() {
+    scoreEl.textContent = solved + "/6";
+    if (solved === CLUES.length && overlay.hidden) {
+      overlay.hidden = false;
+      document.getElementById("again").focus();
+    }
+  }
+
+  function markSolved(card, text) {
+    if (card.dataset.solved === "1") return;
+    card.dataset.solved = "1";
+    card.classList.add("solved");
+    card.classList.remove("miss");
+    var input = card.querySelector("input");
+    input.value = text;
+    input.readOnly = true;
+    card.querySelector(".note").textContent = "Solved";
+    solved += 1;
+    updateScore();
+  }
+
+  CLUES.forEach(function (clue, i) {
+    var card = document.createElement("article");
+    card.className = "clue";
+    card.dataset.answer = clue.answer;
+    card.innerHTML =
+      '<div class="top"><span class="num">' + (i + 1) + '</span><span class="tag' + (clue.fall ? " fall" : "") + '">' + clue.tag + '</span></div>' +
+      '<p class="emojis">' + clue.emoji + '</p>' +
+      '<p class="letters">' + clue.letters + '</p>' +
+      '<input type="text" enterkeyhint="done" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Clue ' + (i + 1) + ' answer">' +
+      '<div class="actions"><button type="button" class="hint">Hint</button><button type="button" class="reveal">Reveal</button></div>' +
+      '<p class="note"></p>';
+    var input = card.querySelector("input");
+    input.placeholder = "Type your guess";
+    function check() {
+      if (card.dataset.solved === "1") return;
+      var value = norm(input.value);
+      if (!value) {
+        card.classList.remove("miss");
+        return;
+      }
+      if (value === clue.answer) markSolved(card, clue.show);
+      else card.classList.add("miss");
+    }
+    input.addEventListener("input", check);
+    card.querySelector(".hint").addEventListener("click", function () {
+      if (card.dataset.solved === "1") return;
+      var letter = clue.show.charAt(0);
+      card.querySelector(".note").textContent = "First letter: " + letter;
+    });
+    card.querySelector(".reveal").addEventListener("click", function () {
+      markSolved(card, clue.show);
+    });
+    root.appendChild(card);
+  });
+
+  document.getElementById("again").addEventListener("click", function () {
+    solved = 0;
+    overlay.hidden = true;
+    root.querySelectorAll(".clue").forEach(function (card) {
+      card.dataset.solved = "0";
+      card.classList.remove("solved", "miss");
+      var input = card.querySelector("input");
+      input.value = "";
+      input.readOnly = false;
+      card.querySelector(".note").textContent = "";
+    });
+    updateScore();
+    root.querySelector("input").focus();
+  });
+})();
+</script>
+</body>
+</html>
