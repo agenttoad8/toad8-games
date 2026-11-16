@@ -8,6 +8,7 @@ Short browser games from TOAD 8 Notaries & Services.
 - [Fall Signing Day](spot-the-difference-fall/) — tap the six changes on Ted and Dora’s autumn signing desk.
 - [Frog Emoji Puzzle](emoji-puzzle/) — guess notary and fall words from emoji clues.
 - [Word Scramble](word-scramble/) — tap letter tiles to unscramble notary and pond words.
+- [Thanksgiving Word Scramble](word-scramble-thanksgiving/) — unscramble eight harvest words by typing or dragging the letters.
 - [Memory Match](memory-match/) — flip cards and match frogs, stamps, and pond treasures.
 - [Help Ted Hop to the Pond!](maze/) — drag Ted through the Maze Monday path to the lily pond.
 
@@ -20,5 +21,6 @@ Published with GitHub Pages from `main`:
 - https://agenttoad8.github.io/toad8-games/spot-the-difference-fall/
 - https://agenttoad8.github.io/toad8-games/emoji-puzzle/
 - https://agenttoad8.github.io/toad8-games/word-scramble/
+- https://agenttoad8.github.io/toad8-games/word-scramble-thanksgiving/
 - https://agenttoad8.github.io/toad8-games/memory-match/
 - https://agenttoad8.github.io/toad8-games/maze/
