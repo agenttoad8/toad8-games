@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#007AE6">
+<title>Thanksgiving Word Scramble · TOAD 8</title>
+<meta name="description" content="Unscramble eight Thanksgiving words. Type a guess or drag the letters into place. A harvest game from TOAD 8 Notaries &amp; Services.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TOAD 8 Brain Games">
+<meta property="og:title" content="Thanksgiving Word Scramble · TOAD 8">
+<meta property="og:description" content="Unscramble eight harvest words. Type them, or drag the letters into place.">
+<meta property="og:url" content="https://agenttoad8.github.io/toad8-games/word-scramble-thanksgiving/">
+<meta property="og:image" content="https://agenttoad8.github.io/toad8-games/word-scramble-thanksgiving/harvest.jpg">
+<meta property="og:image:width" content="900">
+<meta property="og:image:height" content="1200">
+<meta property="og:image:alt" content="Ted and Dora, two green frogs, at a harvest table.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Thanksgiving Word Scramble · TOAD 8">
+<meta name="twitter:description" content="Unscramble eight harvest words. Type them, or drag the letters into place.">
+<meta name="twitter:image" content="https://agenttoad8.github.io/toad8-games/word-scramble-thanksgiving/harvest.jpg">
+<style>
+  @font-face {
+    font-family: "Fredoka";
+    font-style: normal;
+    font-weight: 500 700;
+    font-display: swap;
+    src: url("fredoka.woff2") format("woff2");
+  }
+  :root {
+    --green: #2ea043;
+    --blue: #007ae6;
+    --pink: #ec4899;
+    --cream: #fff6e8;
+    --ink: #1d3b2a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; max-width: 100%; }
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Fredoka", "Trebuchet MS", "Segoe UI", sans-serif;
+    font-weight: 500;
+    color: var(--ink);
+    background: var(--cream);
+    -webkit-tap-highlight-color: transparent;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    text-align: center;
+    padding: calc(8px + env(safe-area-inset-top)) 14px 8px;
+    background: rgba(255, 246, 232, .94);
+  }
+  .home { color: var(--blue); font-weight: 700; font-size: 15px; text-decoration: none; }
+  h1 {
+    margin: 2px 0 0;
+    font-size: clamp(28px, 7.2vw, 42px);
+    line-height: 1.02;
+    font-weight: 700;
+    color: var(--green);
+  }
+  .sub { margin: 4px 0 0; font-weight: 500; color: #8a4b12; font-size: 15px; }
+  #score { margin: 2px 0 0; font-weight: 700; font-size: 20px; color: var(--blue); }
+  .banner {
+    height: 190px;
+    margin: 6px 14px 0;
+    border-radius: 24px;
+    background: #f3d2a4 url("harvest.jpg") center 72% / cover no-repeat;
+    border: 4px solid #fff;
+    outline: 3px solid var(--pink);
+    box-shadow: 0 8px 0 rgba(0, 122, 230, .14);
+  }
+  main { width: min(560px, 100%); margin: 0 auto; padding: 12px 14px 28px; flex: 1; }
+  .words { display: flex; flex-direction: column; gap: 12px; }
+  .card {
+    position: relative;
+    background: #fffdf8;
+    border-radius: 22px;
+    padding: 12px 12px 14px;
+    border: 3px solid #fff;
+    outline: 3px solid var(--green);
+    box-shadow: 0 6px 0 rgba(0, 122, 230, .1);
+    overflow: hidden;
+  }
+  .card.solved { background: #e9f8ec; outline-color: var(--green); }
+  .card.celebrate { animation: pop .5s ease; }
+  @keyframes pop {
+    0% { transform: scale(.97); }
+    45% { transform: scale(1.035); }
+    100% { transform: scale(1); }
+  }
+  .bit {
+    position: absolute;
+    top: 18px;
+    width: 8px;
+    height: 12px;
+    border-radius: 2px;
+    pointer-events: none;
+    animation: burst .7s ease-out forwards;
+  }
+  @keyframes burst {
+    to { transform: translateY(46px) rotate(160deg); opacity: 0; }
+  }
+  .meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-weight: 700; }
+  .num {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--pink); color: #fff;
+  }
+  .count { color: #8a4b12; font-size: 14px; }
+  .tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 10px 0;
+    touch-action: none;
+  }
+  .tile {
+    appearance: none;
+    border: 0;
+    flex: 1 0 30px;
+    max-width: 48px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--blue);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    font-size: 18px;
+    cursor: grab;
+    touch-action: none;
+  }
+  .tile.dragging { opacity: .45; cursor: grabbing; pointer-events: none; }
+  .tile:disabled { cursor: default; background: var(--green); }
+  .tile:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+  input {
+    width: 100%;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    border: 0;
+    border-radius: 14px;
+    min-height: 48px;
+    padding: 10px 12px;
+    background: #fff;
+    box-shadow: inset 0 0 0 3px #d6ebfa;
+  }
+  input:focus { outline: none; box-shadow: inset 0 0 0 3px var(--blue); }
+  .card.miss input { box-shadow: inset 0 0 0 3px var(--pink); }
+  .card.solved input { box-shadow: inset 0 0 0 3px var(--green); background: #fff; }
+  .actions { display: flex; gap: 8px; margin-top: 8px; }
+  .actions button, #reveal-all, #again {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    border-radius: 999px;
+    min-height: 44px;
+  }
+  .actions button { flex: 1; font-size: 16px; padding: 8px 10px; }
+  .hint { background: var(--pink); color: #fff; box-shadow: 0 3px 0 #c7337e; }
+  .shuffle { background: #fff; color: var(--blue); box-shadow: 0 3px 0 rgba(0, 122, 230, .28); }
+  .actions button:disabled { opacity: .55; cursor: default; transform: none; }
+  .actions button:active:not(:disabled), #reveal-all:active, #again:active { transform: translateY(2px); }
+  .actions button:focus-visible, #reveal-all:focus-visible, #again:focus-visible {
+    outline: 3px solid var(--blue); outline-offset: 2px;
+  }
+  .note { min-height: 1.2em; margin: 6px 0 0; font-weight: 700; font-size: 14px; color: var(--blue); }
+  .card.solved .note { color: var(--green); }
+  #reveal-all {
+    display: block;
+    width: min(280px, 100%);
+    margin: 16px auto 0;
+    background: var(--pink);
+    color: #fff;
+    font-size: 18px;
+    padding: 10px 18px;
+    box-shadow: 0 4px 0 #c7337e;
+  }
+  footer {
+    margin-top: auto;
+    background: var(--blue);
+    color: #fff;
+    text-align: center;
+    font-weight: 700;
+    font-size: clamp(14px, 3.5vw, 18px);
+    line-height: 1.3;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+    box-shadow: inset 0 4px 0 rgba(255,255,255,.25);
+  }
+  .overlay {
+    position: fixed; inset: 0; z-index: 20;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px; background: rgba(0, 80, 150, .28);
+  }
+  .overlay[hidden] { display: none; }
+  .dialog {
+    width: min(420px, 100%);
+    background: #fff;
+    border-radius: 28px;
+    padding: 26px 22px 22px;
+    text-align: center;
+    box-shadow: 0 12px 0 rgba(0, 122, 230, .18);
+    border: 4px solid #fff;
+    outline: 3px solid var(--pink);
+  }
+  .dialog h2 { margin: 8px 0 4px; font-size: clamp(28px, 7vw, 36px); color: var(--green); font-weight: 700; }
+  .dialog p { margin: 0 0 16px; color: var(--blue); font-weight: 600; }
+  #again { background: var(--pink); color: #fff; font-size: 18px; padding: 12px 28px; box-shadow: 0 5px 0 #c7337e; }
+  @media (prefers-reduced-motion: reduce) {
+    .card.celebrate, .bit { animation: none; }
+    .bit { display: none; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <a class="home" href="../">All games</a>
+    <h1>Thanksgiving Word Scramble</h1>
+    <p class="sub">Type a word, or drag the letters into place</p>
+    <p id="score" aria-live="polite">Solved 0/8</p>
+  </header>
+  <div class="banner" role="img" aria-label="Ted and Dora, two green frogs, sitting at a harvest table."></div>
+  <main>
+    <div class="words" id="words"></div>
+    <button type="button" id="reveal-all">Reveal all</button>
+  </main>
+  <footer>With Toad-al Gratitude, TOAD 8 Notaries &amp; Services</footer>
+  <div class="overlay" id="overlay" hidden>
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="win-title">
+      <h2 id="win-title">You did it!</h2>
+      <p>All eight harvest words are unscrambled.</p>
+      <button type="button" id="again">Play again</button>
+    </div>
+  </div>
+<script>
+(function () {
+  var WORDS = [
+    ["KYTREU", "TURKEY"],
+    ["VYRAG", "GRAVY"],
+    ["STRAVEH", "HARVEST"],
+    ["BRYRACNER", "CRANBERRY"],
+    ["GUFFINTS", "STUFFING"],
+    ["TIDGRAUTE", "GRATITUDE"],
+    ["TAFES", "FEAST"],
+    ["VELSTOREF", "LEFTOVERS"]
+  ];
+  var root = document.getElementById("words");
+  var scoreEl = document.getElementById("score");
+  var overlay = document.getElementById("overlay");
+  var solved = 0;
+  var resets = [];
+
+  function norm(value) {
+    return String(value || "").toLowerCase().replace(/\s+/g, "");
+  }
+
+  function pretty(answer) {
+    return answer.charAt(0) + answer.slice(1).toLowerCase();
+  }
+
+  function mix(chars, answer, avoid) {
+    var next = chars.slice();
+    var tries = 0;
+    var joined = next.join("");
+    do {
+      for (var i = next.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = next[i];
+        next[i] = next[j];
+        next[j] = tmp;
+      }
+      joined = next.join("");
+      tries += 1;
+    } while ((joined === answer || joined === avoid) && tries < 40);
+    if (joined === answer && next.length > 1) {
+      var swap = next[0];
+      next[0] = next[1];
+      next[1] = swap;
+    }
+    return next;
+  }
+
+  function updateScore() {
+    scoreEl.textContent = "Solved " + solved + "/8";
+    if (solved === WORDS.length && overlay.hidden) {
+      overlay.hidden = false;
+      document.getElementById("again").focus();
+    }
+  }
+
+  function burst(card) {
+    var colors = ["#2ea043", "#007ae6", "#ec4899", "#f5b942", "#fff"];
+    card.classList.remove("celebrate");
+    void card.offsetWidth;
+    card.classList.add("celebrate");
+    for (var i = 0; i < 8; i++) {
+      var bit = document.createElement("i");
+      bit.className = "bit";
+      bit.style.left = (8 + Math.random() * 84) + "%";
+      bit.style.background = colors[i % colors.length];
+      bit.style.animationDelay = (i * 30) + "ms";
+      card.appendChild(bit);
+      (function (node) {
+        setTimeout(function () { node.remove(); }, 800);
+      })(bit);
+    }
+  }
+
+  WORDS.forEach(function (pair, index) {
+    var given = pair[0];
+    var answer = pair[1];
+    var shown = pretty(answer);
+    var card = document.createElement("article");
+    card.className = "card";
+    card.innerHTML =
+      '<div class="meta"><span class="num">' + (index + 1) + '</span><span class="count">' + answer.length + ' letters</span></div>' +
+      '<div class="tiles"></div>' +
+      '<input type="text" enterkeyhint="done" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Word ' + (index + 1) + ', ' + answer.length + ' letters">' +
+      '<div class="actions"><button type="button" class="hint">Hint</button><button type="button" class="shuffle">Shuffle</button></div>' +
+      '<p class="note"></p>';
+    var strip = card.querySelector(".tiles");
+    var input = card.querySelector("input");
+    var hintBtn = card.querySelector(".hint");
+    var shuffleBtn = card.querySelector(".shuffle");
+    var note = card.querySelector(".note");
+    input.placeholder = "Type the word";
+
+    function paint(letters) {
+      strip.innerHTML = "";
+      letters.forEach(function (ch) {
+        var tile = document.createElement("button");
+        tile.type = "button";
+        tile.className = "tile";
+        tile.textContent = ch;
+        tile.setAttribute("aria-label", ch);
+        strip.appendChild(tile);
+      });
+    }
+
+    function order() {
+      return Array.prototype.map.call(strip.children, function (tile) { return tile.textContent; }).join("");
+    }
+
+    function finish() {
+      if (card.dataset.done === "1") return;
+      card.dataset.done = "1";
+      card.classList.add("solved");
+      card.classList.remove("miss");
+      input.value = shown;
+      input.readOnly = true;
+      hintBtn.disabled = true;
+      shuffleBtn.disabled = true;
+      paint(answer.split(""));
+      Array.prototype.forEach.call(strip.children, function (tile) { tile.disabled = true; });
+      note.textContent = "Solved";
+      burst(card);
+      solved += 1;
+      updateScore();
+    }
+
+    function checkTiles() {
+      if (order() === answer) finish();
+    }
+
+    input.addEventListener("input", function () {
+      if (card.dataset.done === "1") return;
+      var value = norm(input.value);
+      if (value === answer.toLowerCase()) finish();
+      else if (value.length >= answer.length) card.classList.add("miss");
+      else card.classList.remove("miss");
+    });
+
+    hintBtn.addEventListener("click", function () {
+      if (card.dataset.done === "1") return;
+      note.textContent = "First letter: " + answer.charAt(0);
+      var tiles = Array.prototype.slice.call(strip.children);
+      var at = -1;
+      for (var i = 0; i < tiles.length; i++) {
+        if (tiles[i].textContent === answer.charAt(0)) { at = i; break; }
+      }
+      if (at > 0) strip.insertBefore(tiles[at], tiles[0]);
+      checkTiles();
+    });
+
+    shuffleBtn.addEventListener("click", function () {
+      if (card.dataset.done === "1") return;
+      var current = order();
+      paint(mix(current.split(""), answer, current));
+    });
+
+    var drag = null;
+    strip.addEventListener("pointerdown", function (e) {
+      var tile = e.target.closest(".tile");
+      if (!tile || tile.disabled || card.dataset.done === "1") return;
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      drag = { tile: tile, id: e.pointerId };
+      tile.classList.add("dragging");
+      tile.setPointerCapture(e.pointerId);
+    });
+    strip.addEventListener("pointermove", function (e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      var under = document.elementFromPoint(e.clientX, e.clientY);
+      var over = under && under.closest ? under.closest(".tile") : null;
+      if (!over || over === drag.tile || over.parentElement !== strip) return;
+      var tiles = Array.prototype.slice.call(strip.children);
+      if (tiles.indexOf(drag.tile) < tiles.indexOf(over)) over.after(drag.tile);
+      else over.before(drag.tile);
+    });
+    function endDrag(e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      drag.tile.classList.remove("dragging");
+      drag = null;
+      checkTiles();
+    }
+    strip.addEventListener("pointerup", endDrag);
+    strip.addEventListener("pointercancel", endDrag);
+
+    paint(given.split(""));
+    resets.push(function () {
+      card.dataset.done = "0";
+      card.classList.remove("solved", "celebrate", "miss");
+      input.value = "";
+      input.readOnly = false;
+      hintBtn.disabled = false;
+      shuffleBtn.disabled = false;
+      note.textContent = "";
+      paint(given.split(""));
+    });
+    root.appendChild(card);
+  });
+
+  document.getElementById("reveal-all").addEventListener("click", function () {
+    root.querySelectorAll(".card").forEach(function (card) {
+      if (card.dataset.done === "1") return;
+      card.querySelector(".hint").click();
+      var input = card.querySelector("input");
+      if (card.dataset.done === "1") return;
+      var word = "";
+      WORDS.forEach(function (pair, i) {
+        if (card.querySelector(".num").textContent === String(i + 1)) word = pretty(pair[1]);
+      });
+      input.value = word;
+      input.dispatchEvent(new Event("input"));
+    });
+  });
+
+  document.getElementById("again").addEventListener("click", function () {
+    solved = 0;
+    overlay.hidden = true;
+    resets.forEach(function (reset) { reset(); });
+    updateScore();
+    var first = root.querySelector("input");
+    if (first) first.focus();
+  });
+})();
+</script>
+</body>
+</html>
