@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#007AE6">
+<title>Thanksgiving Riddle · TOAD 8</title>
+<meta name="description" content="A Thanksgiving riddle from Ted and Dora. Guess the answer, take a hint, or reveal it. A brain game from TOAD 8 Notaries &amp; Services.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TOAD 8 Brain Games">
+<meta property="og:title" content="Thanksgiving Riddle · TOAD 8">
+<meta property="og:description" content="Ted and Dora have a dinner riddle. What am I?">
+<meta property="og:url" content="https://agenttoad8.github.io/toad8-games/riddle-thanksgiving/">
+<meta property="og:image" content="https://agenttoad8.github.io/toad8-games/riddle-thanksgiving/room.jpg">
+<meta property="og:image:width" content="864">
+<meta property="og:image:height" content="1152">
+<meta property="og:image:alt" content="Ted and Dora, two green frogs, on a sofa in a cozy autumn room.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Thanksgiving Riddle · TOAD 8">
+<meta name="twitter:description" content="Ted and Dora have a dinner riddle. What am I?">
+<meta name="twitter:image" content="https://agenttoad8.github.io/toad8-games/riddle-thanksgiving/room.jpg">
+<link rel="preload" href="fredoka.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+  @font-face {
+    font-family: "Fredoka";
+    font-style: normal;
+    font-weight: 500 700;
+    font-display: swap;
+    src: url("fredoka.woff2") format("woff2");
+  }
+  :root {
+    --green: #2ea043;
+    --atlantis: #7cd651;
+    --blue: #007ae6;
+    --pink: #ec4899;
+    --cream: #fff6e8;
+    --ink: #1d3b2a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; max-width: 100%; }
+  body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Fredoka", "Trebuchet MS", "Segoe UI", sans-serif;
+    font-weight: 500;
+    color: var(--ink);
+    background: var(--cream);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    text-align: center;
+    padding: calc(8px + env(safe-area-inset-top)) 14px 8px;
+    background: rgba(255, 246, 232, .94);
+  }
+  .home { color: var(--blue); font-weight: 700; font-size: 15px; text-decoration: none; }
+  .home:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; border-radius: 8px; }
+  h1 {
+    margin: 2px 0 0;
+    font-size: clamp(28px, 7.2vw, 42px);
+    line-height: 1.02;
+    font-weight: 700;
+    color: var(--green);
+  }
+  .sub { margin: 4px 0 0; font-weight: 500; color: #8a4b12; font-size: 15px; }
+  main {
+    width: min(520px, 100%);
+    margin: 0 auto;
+    padding: 4px 14px 28px;
+    flex: 1;
+  }
+  .scene {
+    position: relative;
+    margin: 6px 0 0;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 4px solid #fff;
+    outline: 3px solid var(--pink);
+    box-shadow: 0 8px 0 rgba(0, 122, 230, .14);
+    background: #f3e2c8;
+  }
+  .scene img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .riddle {
+    position: absolute;
+    z-index: 2;
+    top: 3.2%;
+    left: 5%;
+    right: 5%;
+    margin: 0;
+    padding: 12px 14px 11px;
+    text-align: center;
+    background: rgba(255, 253, 248, .96);
+    border: 3px solid var(--pink);
+    border-radius: 20px;
+    box-shadow: 0 10px 22px rgba(80, 40, 10, .12);
+  }
+  .verse {
+    margin: 0;
+    font-size: clamp(15px, 3.6vw, 18px);
+    line-height: 1.32;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .ask {
+    margin: 8px 0 0;
+    font-size: clamp(18px, 4.8vw, 24px);
+    line-height: 1.1;
+    font-weight: 700;
+    color: var(--blue);
+  }
+  .play {
+    position: relative;
+    z-index: 2;
+    margin-top: 14px;
+    background: #fffdf8;
+    border-radius: 22px;
+    padding: 14px 12px 14px;
+    border: 3px solid #fff;
+    outline: 3px solid var(--green);
+    box-shadow: 0 6px 0 rgba(0, 122, 230, .1);
+  }
+  .play.solved { background: #e9f8ec; }
+  .play.miss input { box-shadow: inset 0 0 0 3px var(--pink); }
+  .note {
+    margin: 0 0 8px;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.35;
+    color: var(--blue);
+  }
+  .note:empty { display: none; }
+  .play.solved .note,
+  .play.solved .hints { display: none; }
+  .guess-row, .actions { display: flex; gap: 8px; }
+  .guess-row { align-items: stretch; }
+  input {
+    flex: 1;
+    min-width: 0;
+    width: 100%;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    border: 0;
+    border-radius: 14px;
+    min-height: 48px;
+    padding: 10px 12px;
+    background: #fff;
+    box-shadow: inset 0 0 0 3px #d6ebfa;
+  }
+  input:focus { outline: none; box-shadow: inset 0 0 0 3px var(--blue); }
+  input:focus-visible { outline: 3px solid var(--pink); outline-offset: 2px; }
+  button {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    border-radius: 999px;
+    min-height: 48px;
+  }
+  button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+  button:active:not(:disabled) { transform: translateY(2px); }
+  button:disabled { opacity: .55; cursor: default; transform: none; }
+  #guess-btn {
+    flex: 0 0 auto;
+    padding: 0 18px;
+    background: var(--blue);
+    color: #fff;
+    box-shadow: 0 4px 0 #005fb4;
+    font-size: 17px;
+  }
+  .actions { margin-top: 8px; }
+  .actions button { flex: 1; font-size: 16px; padding: 8px 12px; }
+  #hint { background: var(--pink); color: #fff; box-shadow: 0 4px 0 #c7337e; }
+  #reveal {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    scroll-margin-bottom: 18px;
+    background: #fff;
+    color: var(--blue);
+    box-shadow: 0 4px 0 rgba(0, 122, 230, .28);
+    font-size: 16px;
+  }
+  [hidden] { display: none !important; }
+  .hints {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .hints:empty { display: none; }
+  .hints li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    padding: 8px 10px;
+    background: #fff;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.35;
+    color: var(--ink);
+    box-shadow: inset 0 0 0 2px rgba(124, 214, 81, .55);
+  }
+  .hn {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--pink);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .result { text-align: center; padding: 4px 4px 2px; }
+  .party { display: flex; justify-content: center; gap: 7px; margin: 2px 0 4px; }
+  .party i {
+    display: block;
+    width: 9px;
+    height: 14px;
+    border-radius: 2px;
+  }
+  .party i:nth-child(1) { background: var(--green); transform: rotate(-18deg); }
+  .party i:nth-child(2) { background: var(--pink); transform: rotate(12deg); }
+  .party i:nth-child(3) { background: var(--blue); transform: rotate(-8deg); }
+  .party i:nth-child(4) { background: var(--atlantis); transform: rotate(20deg); }
+  .party i:nth-child(5) { background: #f5b942; transform: rotate(-14deg); }
+  .frog {
+    margin: 0;
+    font-size: 46px;
+    line-height: 1;
+    animation: hop .65s ease-in-out 4;
+  }
+  @keyframes hop {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    40% { transform: translateY(-18px) rotate(-8deg); }
+    70% { transform: translateY(0) rotate(6deg); }
+  }
+  .yay {
+    margin: 4px 0 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--blue);
+  }
+  .answer {
+    margin: 4px 0 12px;
+    font-size: clamp(22px, 5.4vw, 28px);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--green);
+  }
+  #again {
+    background: var(--pink);
+    color: #fff;
+    font-size: 18px;
+    padding: 12px 28px;
+    box-shadow: 0 5px 0 #c7337e;
+  }
+  .play.celebrate { animation: pop .5s ease; }
+  @keyframes pop {
+    0% { transform: scale(.98); }
+    45% { transform: scale(1.025); }
+    100% { transform: scale(1); }
+  }
+  #confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+  .bit {
+    position: absolute;
+    top: -16px;
+    width: 9px;
+    height: 14px;
+    border-radius: 2px;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    to { transform: translateY(105vh) rotate(520deg); opacity: 1; }
+  }
+  footer {
+    margin-top: auto;
+    background: var(--blue);
+    color: #fff;
+    text-align: center;
+    font-weight: 700;
+    font-size: clamp(14px, 3.5vw, 18px);
+    line-height: 1.3;
+    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+    box-shadow: inset 0 4px 0 rgba(255,255,255,.25);
+  }
+  @media (min-width: 840px) {
+    main {
+      width: min(900px, calc(100% - 48px));
+      display: grid;
+      grid-template-columns: 420px minmax(280px, 1fr);
+      column-gap: 20px;
+      align-items: start;
+      padding-top: 8px;
+    }
+    .scene { margin-top: 0; }
+    .play { margin-top: 0; position: sticky; top: 112px; }
+    .verse { font-size: 17px; }
+  }
+  @media (max-width: 359px) {
+    .verse { font-size: 14px; }
+    .riddle { left: 3.5%; right: 3.5%; padding: 10px 10px 9px; }
+    .guess-row { flex-direction: column; }
+    #guess-btn { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .frog, .play.celebrate, .bit { animation: none; }
+    .bit { display: none; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <a class="home" href="../">All games</a>
+    <h1>Thanksgiving Riddle</h1>
+    <p class="sub">Monday brain game with Ted and Dora</p>
+  </header>
+  <main>
+    <section class="scene">
+      <img src="room.jpg" width="864" height="1152" alt="Ted, a green frog with round black glasses and a blue sweater, and Dora, a green frog with auburn wavy hair and a pink cardigan, sit on a sofa in a cozy autumn room.">
+      <div class="riddle">
+        <p class="verse" id="riddle-text">I have lots of eyes,<br>but I never watch the parade.<br>I get peeled, boiled, and mashed,<br>yet I still come to dinner<br>wearing a pat of butter.</p>
+        <p class="ask">What am I?</p>
+      </div>
+    </section>
+    <section class="play" id="play" aria-labelledby="riddle-text">
+      <p class="note" id="note" role="status"></p>
+      <form id="form">
+        <div class="guess-row">
+          <input id="guess" type="text" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="80" placeholder="Type your guess" aria-label="Your guess">
+          <button type="submit" id="guess-btn">Guess</button>
+        </div>
+      </form>
+      <div class="actions" id="actions">
+        <button type="button" id="hint">Hint</button>
+      </div>
+      <ol class="hints" id="hints"></ol>
+      <button type="button" id="reveal" hidden>Reveal answer</button>
+      <div class="result" id="result" role="status" hidden>
+        <div class="party" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        <p class="frog" aria-hidden="true">🐸</p>
+        <p class="yay" id="result-title"></p>
+        <p class="answer" id="answer"></p>
+        <button type="button" id="again">Play again</button>
+      </div>
+    </section>
+  </main>
+  <footer>With Toad-al Gratitude, TOAD 8 Notaries &amp; Services</footer>
+  <div id="confetti" aria-hidden="true"></div>
+<script>
+(function () {
+  var HINTS = [
+    "Those eyes aren't for seeing — they're for sprouting.",
+    "I grow underground and show up at almost every Thanksgiving table.",
+    "Ted likes me mashed with gravy; Dora likes me as fries."
+  ];
+  var ANSWER = "A POTATO! 🥔 (mashed potatoes, of course)";
+  var ACCEPTED = {
+    potato: 1,
+    potatoes: 1,
+    "mashed potato": 1,
+    "mashed potatoes": 1,
+    spud: 1,
+    spuds: 1,
+    tater: 1,
+    taters: 1
+  };
+  var NUDGES = [
+    "Ribbit… not quite. Ted pushed up his glasses.",
+    "Dora shook her head over her cocoa. Try again!",
+    "That guess hopped the wrong way. Give it another go.",
+    "The frogs are still thinking. So are you — nice.",
+    "Not that one. A hint is there if you want a nudge."
+  ];
+  var play = document.getElementById("play");
+  var form = document.getElementById("form");
+  var input = document.getElementById("guess");
+  var note = document.getElementById("note");
+  var hintBtn = document.getElementById("hint");
+  var revealBtn = document.getElementById("reveal");
+  var actions = document.getElementById("actions");
+  var hintsEl = document.getElementById("hints");
+  var result = document.getElementById("result");
+  var resultTitle = document.getElementById("result-title");
+  var answerEl = document.getElementById("answer");
+  var confetti = document.getElementById("confetti");
+  var shown = 0;
+  var nudge = 0;
+  var done = false;
+  var confettiTimer = 0;
+
+  function normalize(value) {
+    var s = String(value || "").toLowerCase();
+    s = s.replace(/[\u2018\u2019\u2032']/g, "");
+    s = s.replace(/[^a-z]+/g, " ").replace(/\s+/g, " ").trim();
+    var next = s;
+    do {
+      s = next;
+      next = s.replace(/^(a|an|the|its|it is)\s+/, "");
+    } while (next !== s);
+    return s;
+  }
+
+  function isAnswer(value) {
+    var s = normalize(value);
+    if (!s) return false;
+    if (ACCEPTED[s]) return true;
+    var compact = s.replace(/ /g, "");
+    for (var key in ACCEPTED) {
+      if (Object.prototype.hasOwnProperty.call(ACCEPTED, key) && key.replace(/ /g, "") === compact) return true;
+    }
+    return false;
+  }
+
+  function celebrate() {
+    play.classList.remove("celebrate");
+    void play.offsetWidth;
+    play.classList.add("celebrate");
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    clearTimeout(confettiTimer);
+    confetti.innerHTML = "";
+    var colors = ["#2ea043", "#7cd651", "#007ae6", "#ec4899", "#f5b942", "#fff6e8"];
+    for (var i = 0; i < 42; i++) {
+      var bit = document.createElement("i");
+      bit.className = "bit";
+      bit.style.left = Math.random() * 100 + "%";
+      bit.style.background = colors[i % colors.length];
+      bit.style.animationDuration = (1.5 + Math.random() * 1.1) + "s";
+      bit.style.animationDelay = (Math.random() * 0.25) + "s";
+      bit.style.width = (7 + (i % 4) * 2) + "px";
+      confetti.appendChild(bit);
+    }
+    confettiTimer = setTimeout(function () { confetti.innerHTML = ""; }, 2800);
+  }
+
+  function finish(kind) {
+    if (done) return;
+    done = true;
+    play.classList.add("solved");
+    play.classList.remove("miss");
+    answerEl.textContent = ANSWER;
+    resultTitle.textContent = kind === "guess" ? "You got it!" : "Here's the answer";
+    form.hidden = true;
+    actions.hidden = true;
+    revealBtn.hidden = true;
+    result.hidden = false;
+    if (kind === "guess") celebrate();
+    document.getElementById("again").focus();
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (done) return;
+    var raw = input.value;
+    if (!normalize(raw)) {
+      note.textContent = "Type a guess first. Ted and Dora are listening.";
+      play.classList.remove("miss");
+      input.focus();
+      return;
+    }
+    if (isAnswer(raw)) {
+      note.textContent = "";
+      finish("guess");
+      return;
+    }
+    play.classList.add("miss");
+    note.textContent = NUDGES[nudge % NUDGES.length];
+    nudge += 1;
+    input.focus();
+    input.select();
+  });
+
+  input.addEventListener("input", function () {
+    play.classList.remove("miss");
+  });
+
+  hintBtn.addEventListener("click", function () {
+    if (done || shown >= HINTS.length) return;
+    var li = document.createElement("li");
+    var badge = document.createElement("span");
+    badge.className = "hn";
+    badge.textContent = String(shown + 1);
+    var text = document.createElement("span");
+    text.textContent = HINTS[shown];
+    li.appendChild(badge);
+    li.appendChild(text);
+    hintsEl.appendChild(li);
+    shown += 1;
+    note.textContent = "Hint " + shown + " of 3";
+    if (shown === HINTS.length) {
+      hintBtn.disabled = true;
+      hintBtn.textContent = "Hints used";
+      revealBtn.hidden = false;
+      revealBtn.scrollIntoView({ block: "nearest", inline: "nearest" });
+    } else {
+      hintBtn.textContent = "Next hint";
+      li.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  });
+
+  revealBtn.addEventListener("click", function () {
+    note.textContent = "";
+    finish("reveal");
+  });
+
+  document.getElementById("again").addEventListener("click", function () {
+    done = false;
+    shown = 0;
+    nudge = 0;
+    play.classList.remove("solved", "celebrate", "miss");
+    form.hidden = false;
+    actions.hidden = false;
+    result.hidden = true;
+    revealBtn.hidden = true;
+    hintBtn.disabled = false;
+    hintBtn.textContent = "Hint";
+    hintsEl.innerHTML = "";
+    note.textContent = "";
+    answerEl.textContent = "";
+    resultTitle.textContent = "";
+    input.value = "";
+    clearTimeout(confettiTimer);
+    confetti.innerHTML = "";
+    input.focus();
+  });
+})();
+</script>
+</body>
+</html>
