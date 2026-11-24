@@ -30,7 +30,7 @@ jobs:
 
       - name: Assemble site
         run: |
-          mkdir -p _site/frog-pond _site/find-the-frogs _site/spot-the-difference _site/spot-the-difference-fall _site/word-scramble _site/word-scramble-thanksgiving _site/memory-match _site/maze _site/emoji-puzzle
+          mkdir -p _site/frog-pond _site/find-the-frogs _site/spot-the-difference _site/spot-the-difference-fall _site/word-scramble _site/word-scramble-thanksgiving _site/memory-match _site/maze _site/emoji-puzzle _site/riddle-thanksgiving
           cp index.html og.png .nojekyll _site/
           cp frog-pond/index.html _site/frog-pond/index.html
           cp find-the-frogs/index.html find-the-frogs/board.png _site/find-the-frogs/
@@ -39,6 +39,7 @@ jobs:
           cp emoji-puzzle/index.html emoji-puzzle/meadow.jpg _site/emoji-puzzle/
           cp word-scramble/index.html _site/word-scramble/index.html
           cp word-scramble-thanksgiving/index.html word-scramble-thanksgiving/harvest.jpg word-scramble-thanksgiving/fredoka.woff2 _site/word-scramble-thanksgiving/
+          cp riddle-thanksgiving/index.html riddle-thanksgiving/room.jpg riddle-thanksgiving/fredoka.woff2 _site/riddle-thanksgiving/
           cp memory-match/index.html _site/memory-match/index.html
           cp maze/index.html _site/maze/index.html
 
